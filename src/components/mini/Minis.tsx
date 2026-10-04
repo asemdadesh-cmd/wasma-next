@@ -132,7 +132,7 @@ export function NuraMini({ lang }: MiniProps) {
       </div>
       <div className="relative flex flex-1 items-center justify-center overflow-hidden">
         <div aria-hidden="true" className="absolute inset-y-0 end-0 w-1/3 bg-gradient-to-l from-[#2F5BFF]/30 to-transparent rtl:bg-gradient-to-r" />
-        <NuraObject kind={p.id} color={f.hex} scale={s.id === "s" ? 0.8 : s.id === "l" ? 1.12 : 0.95} className="relative h-36 w-36 transition-transform duration-300" />
+        <NuraObject kind={p.id} color={f.hex} scale={s.id === "s" ? 0.8 : s.id === "l" ? 1.12 : 0.95} className="relative aspect-square h-[min(78%,20rem)] min-h-28 w-auto transition-transform duration-300" />
       </div>
       <div className="grid gap-3 px-5 pb-5">
         <div className="flex items-center justify-between gap-3">
@@ -179,7 +179,7 @@ export function NoteMini({ lang, compact }: MiniProps) {
   const [cat, setCat] = useState("coffee");
   const [diet, setDiet] = useState<Diet | null>(null);
   const [order, setOrder] = useState<Record<string, number>>({});
-  const items = menu.filter((m) => m.cat === cat && (!diet || m.diet.includes(diet))).slice(0, compact ? 3 : 4);
+  const items = menu.filter((m) => m.cat === cat && (!diet || m.diet.includes(diet))).slice(0, compact ? 3 : 6);
   const count = Object.values(order).reduce((a, b) => a + b, 0);
   const total = Object.entries(order).reduce((a, [id, q]) => a + (menu.find((m) => m.id === id)?.price ?? 0) * q, 0);
   return (
@@ -278,7 +278,7 @@ export function MadarMini({ lang }: MiniProps) {
         ))}
       </div>
       <ul className="flex-1 overflow-hidden px-4 text-sm">
-        {results.slice(0, 3).map((l) => (
+        {results.slice(0, 6).map((l) => (
           <li key={l.id} className="flex items-center justify-between border-t border-[#0F1417]/10 py-2">
             <span className="truncate">{l.title[lang]}</span>
             <span className="tabular shrink-0 font-semibold">{formatLYD(l.price, lang)}</span>
@@ -291,7 +291,7 @@ export function MadarMini({ lang }: MiniProps) {
 }
 
 /* SANAD ─ three-step booking */
-export function SanadMini({ lang }: MiniProps) {
+export function SanadMini({ lang, compact }: MiniProps) {
   const ar = lang === "ar";
   const [spec, setSpec] = useState<string | null>(null);
   const [day, setDay] = useState<number | null>(null);
@@ -317,6 +317,11 @@ export function SanadMini({ lang }: MiniProps) {
         </ol>
       </div>
       <div className="flex-1 px-5" aria-live="polite">
+        {!compact && step === 0 && (
+          <p className="mb-5 mt-2 max-w-[18ch] text-[clamp(1.6rem,2.6vw,2.4rem)] font-semibold leading-tight">
+            {ar ? "احجز موعدك في أقل من دقيقة." : "Book a doctor in under a minute."}
+          </p>
+        )}
         <p className="mb-3 text-sm text-[#2F8F75]">{labels[step]}</p>
         {step === 0 && (
           <div className="grid grid-cols-2 gap-2">

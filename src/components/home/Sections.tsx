@@ -4,6 +4,7 @@ import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "fr
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useIsDesktop } from "@/hooks/useMedia";
+import { useVerifyState } from "@/hooks/useVerifyState";
 import type { Dict } from "@/lib/dictionaries/ar";
 import type { Locale } from "@/lib/i18n";
 
@@ -66,6 +67,8 @@ export function Statement({ t, lang }: { t: Dict["statement"]; lang: Locale }) {
   const dir = lang === "ar" ? 1 : -1;
   const x = useTransform(p, [0.05, 0.9], [0, dir * travel]);
   const subOpacity = useTransform(p, [0.55, 0.8], [0, 1]);
+  const stage = useRef<HTMLDivElement>(null);
+  useVerifyState(stage, x, 0);
 
   useIso(() => {
     if (reduced) return;
@@ -99,12 +102,12 @@ export function Statement({ t, lang }: { t: Dict["statement"]; lang: Locale }) {
 
   return (
     <section ref={ref} aria-labelledby="statement" className={`on-ink relative bg-ink text-paper ${desktop ? "h-[260vh]" : "h-[200vh]"}`} data-sc-act="pan">
-      <div className="sticky top-0 flex h-svh flex-col justify-center overflow-hidden">
+      <div ref={stage} className="sticky top-0 flex h-svh flex-col justify-center overflow-hidden">
         <motion.h2
           id="statement"
           ref={line}
           style={{ x }}
-          className="display w-max whitespace-nowrap px-[var(--gutter)] text-[clamp(5.5rem,24vw,22rem)]"
+          className="display w-max whitespace-nowrap px-[var(--gutter)] text-[clamp(4.6rem,17vw,15rem)]"
         >
           {t.line}
         </motion.h2>
@@ -220,6 +223,8 @@ export function Featured({ t, lang, scene }: { t: Dict["featured"]; lang: Locale
   const copyY = useTransform(p, [0.45, 0.75], [60, 0]);
   const copyO = useTransform(p, [0.45, 0.7], [0, 1]);
   const labelO = useTransform(p, [0, 0.3], [1, 0]);
+  const stage = useRef<HTMLDivElement>(null);
+  useVerifyState(stage, p);
 
   const copy = (
     <div className="bg-paper p-6 text-ink shadow-[0_24px_48px_-24px_rgba(11,13,12,.5)] sm:p-8">
@@ -260,13 +265,13 @@ export function Featured({ t, lang, scene }: { t: Dict["featured"]; lang: Locale
 
   return (
     <section ref={ref} aria-labelledby="featured-title" className="relative h-[230vh] bg-ink" data-sc-act="reveal">
-      <div className="sticky top-0 h-svh overflow-hidden">
+      <div ref={stage} className="sticky top-0 h-svh overflow-hidden">
         <motion.div className="absolute inset-0" style={{ clipPath: clip }}>
           <motion.div className="absolute inset-0" style={{ scale }}>
             {scene}
           </motion.div>
         </motion.div>
-        <motion.p style={{ opacity: labelO }} className="absolute inset-x-0 bottom-[10%] text-center text-sm font-medium text-paper">
+        <motion.p style={{ opacity: labelO }} className="absolute inset-x-0 top-[9%] text-center text-sm font-medium text-paper">
           SAHRA · {lang === "ar" ? "صحرا" : "Coastal retreat"}
         </motion.p>
         <div className="wrap relative flex h-full items-end pb-[6vh]">

@@ -238,7 +238,7 @@ export function NoteSite({ lang, photos }: Props) {
             </select>
           </label>
         </div>
-        <p className="mt-2 text-sm opacity-85">{T.hours[lang]}</p>
+        <p className="mt-2 text-sm">{T.hours[lang]}</p>
       </header>
 
       <div className="lg:grid lg:grid-cols-[1fr_24rem] lg:gap-10 lg:px-[var(--gutter)]">

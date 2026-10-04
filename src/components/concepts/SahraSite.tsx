@@ -14,7 +14,7 @@ const naskh = Noto_Naskh_Arabic({ subsets: ["arabic"], weight: ["400", "500", "6
 
 type Props = { lang: Locale; photos: PhotoMap };
 
-const C = { stone: "#ECE5D6", stone2: "#E2D8C4", ink: "#1B1A17", soft: "#5A5346", olive: "#5F6B3A", cobalt: "#1F4FA0" };
+const C = { stone: "#ECE5D6", stone2: "#E2D8C4", ink: "#1B1A17", soft: "#5A5346", olive: "#46512B", cobalt: "#1F4FA0" };
 
 const copy = {
   nav: { ar: ["الفناء", "الغرف", "المائدة", "خطّط إقامتك"], en: ["Courtyard", "Rooms", "Table", "Plan a stay"] },
@@ -213,7 +213,7 @@ function Rooms({ lang, photos, onPlan }: Props & { onPlan: (id: string) => void 
           </div>
         </div>
       </div>
-      <div ref={rail} className="rail mt-10 flex snap-x snap-mandatory gap-6 overflow-x-auto px-[var(--gutter)] pb-6" tabIndex={0} aria-label={copy.chapters[lang][1]} role="region">
+      <div ref={rail} className="rail mt-10 flex snap-x snap-mandatory gap-6 overflow-x-auto px-[var(--gutter)] pb-6" tabIndex={0} aria-label={lang === "ar" ? "معرض الغرف، قابل للتمرير" : "Room gallery, scrollable"} role="region">
         {rooms.map((r, i) => (
           <article key={r.id} data-i={i} className="w-[84vw] shrink-0 snap-start sm:w-[60vw] lg:w-[42vw]" aria-labelledby={`room-${r.id}`}>
             <div className="relative aspect-[4/3] overflow-hidden">

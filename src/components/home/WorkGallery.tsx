@@ -138,13 +138,13 @@ function Stage({ lang, t }: Props) {
         aria-labelledby={`tab-${active}`}
         className="relative min-h-0 flex-1 overflow-hidden border-x border-b border-ink"
       >
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence initial={false}>
           <motion.div
             key={active}
             className="absolute inset-0"
             initial={reduced ? { opacity: 0 } : { opacity: 0, clipPath: "inset(0 0 100% 0)" }}
             animate={reduced ? { opacity: 1 } : { opacity: 1, clipPath: "inset(0 0 0% 0)" }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, transition: { duration: reduced ? 0.01 : 0.25, delay: reduced ? 0 : 0.2 } }}
             transition={{ duration: reduced ? 0.01 : 0.45, ease: [0.23, 1, 0.32, 1] }}
           >
             <Mini lang={lang} />
@@ -165,7 +165,7 @@ function Stage({ lang, t }: Props) {
 
 export function WorkGallery({ lang, t }: Props) {
   const desktop = useIsDesktop();
-  const { setActive } = useSelection();
+  const { active, setActive } = useSelection();
 
   // On desktop the chapter crossing the middle of the viewport drives the stage.
   useEffect(() => {
@@ -183,7 +183,7 @@ export function WorkGallery({ lang, t }: Props) {
   }, [desktop, setActive]);
 
   return (
-    <section id="work" aria-labelledby="work-title" className="relative border-t border-line bg-paper py-[var(--section)]" data-sc-act="pin">
+    <section id="work" aria-labelledby="work-title" className="relative border-t border-line bg-paper py-[var(--section)]" data-sc-act={desktop ? "pin" : "flow"}>
       <div className="wrap">
         <div className="grid gap-6 lg:grid-cols-12">
           <h2 id="work-title" className="display text-[clamp(2.6rem,6.4vw,6rem)] lg:col-span-8">
@@ -194,7 +194,7 @@ export function WorkGallery({ lang, t }: Props) {
 
         {desktop ? (
           <div className="mt-[clamp(3rem,6vw,6rem)] grid grid-cols-12 gap-10">
-            <div className="col-span-5">
+            <div className="col-span-5 pb-[22vh]">
               {projects.map((p, i) => (
                 <article
                   key={p.slug}
@@ -211,7 +211,7 @@ export function WorkGallery({ lang, t }: Props) {
               ))}
             </div>
             <div className="col-span-7">
-              <div className="sticky top-[calc(var(--nav-h)+1.5rem)] h-[calc(100svh-var(--nav-h)-3rem)] max-h-[52rem] min-h-[34rem]">
+              <div data-sc-verify-state={active} className="sticky top-[calc(var(--nav-h)+1.5rem)] h-[calc(100svh-var(--nav-h)-3rem)] max-h-[52rem] min-h-[34rem]">
                 <Stage lang={lang} t={t} />
               </div>
             </div>

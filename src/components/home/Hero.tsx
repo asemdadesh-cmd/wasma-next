@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { STROKE_A, STROKE_B, MARK_VIEWBOX } from "@/components/brand/Mark";
 import { MINIS } from "@/components/mini/Minis";
 import { useIsDesktop } from "@/hooks/useMedia";
+import { useVerifyState } from "@/hooks/useVerifyState";
 import type { Dict } from "@/lib/dictionaries/ar";
 import type { Locale } from "@/lib/i18n";
 import { projects } from "@/lib/projects";
@@ -14,26 +15,26 @@ import { useSelection } from "./Selection";
 type Props = { lang: Locale; t: Dict["hero"]; nav: Dict["nav"]; surface: React.ReactNode };
 
 // Panel geometry relative to the mark's width (see Mark.tsx for the square).
-const PANEL_W = 0.72; // of mark width
-const PANEL_H = 0.8; // of mark width
+// Desktop: a window over the strokes. Phone: a full-width band below them.
+const GEOMETRY = { desktop: { w: 0.72, h: 0.8 }, phone: { w: 1, h: 1.42 } };
 const SQ = 62 / MARK_VIEWBOX.w; // square size as a fraction of mark width
-const FX = SQ / PANEL_W;
-const FY = SQ / PANEL_H;
 
 /** clip-path that starts exactly on the lime square (top-right) and opens to the full panel. */
-function useOpening(p: MotionValue<number>) {
+function useOpening(p: MotionValue<number>, fx: number, fy: number) {
   return useTransform(p, (v) => {
     const k = Math.min(1, Math.max(0, v));
     const e = 1 - Math.pow(1 - k, 3);
-    const bottom = (1 - FY) * (1 - e) * 100;
-    const left = (1 - FX) * (1 - e) * 100;
+    const bottom = (1 - fy) * (1 - e) * 100;
+    const left = (1 - fx) * (1 - e) * 100;
     return `inset(0% 0% ${bottom.toFixed(2)}% ${left.toFixed(2)}%)`;
   });
 }
 
-function Viewfinder({ lang, t, open, className = "" }: { lang: Locale; t: Dict["hero"]; open: MotionValue<number>; className?: string }) {
+function Viewfinder({ lang, t, open, geo, className = "" }: { lang: Locale; t: Dict["hero"]; open: MotionValue<number>; geo: { w: number; h: number }; className?: string }) {
   const { active, setActive } = useSelection();
-  const clip = useOpening(open);
+  const PANEL_W = geo.w;
+  const PANEL_H = geo.h;
+  const clip = useOpening(open, SQ / PANEL_W, SQ / PANEL_H);
   const veil = useTransform(open, [0.1, 0.55], [1, 0]);
   const [usable, setUsable] = useState(open.get() > 0.85);
   useMotionValueEvent(open, "change", (v) => setUsable(v > 0.85));
@@ -45,22 +46,21 @@ function Viewfinder({ lang, t, open, className = "" }: { lang: Locale; t: Dict["
       // Keep the hidden interface out of the tab order until it has opened.
       inert={!usable}
       dir={lang === "ar" ? "rtl" : "ltr"}
-      data-sc-verify-state={usable ? "open" : "closed"}
     >
       <div className="flex h-full flex-col bg-ink shadow-[0_30px_60px_-30px_rgba(11,13,12,.55)]">
         <div className="flex items-center justify-between gap-3 px-3 py-2 text-paper">
-          <span className="flex items-center gap-2 text-xs font-medium">
+          <span className="flex shrink-0 items-center gap-2 text-xs font-medium">
             <span className="size-2 bg-lime" aria-hidden="true" />
-            {t.viewfinder}
+            <span className="hidden sm:inline">{t.viewfinder}</span>
           </span>
-          <div className="flex gap-0.5" role="group" aria-label={t.viewfinderHint}>
+          <div className="rail flex gap-0.5 overflow-x-auto" role="group" aria-label={t.viewfinderHint}>
             {projects.map((p) => (
               <button
                 key={p.slug}
                 type="button"
                 aria-pressed={active === p.slug}
                 onClick={() => setActive(p.slug)}
-                className={`min-h-8 px-2 text-[0.72rem] font-semibold transition-colors ${active === p.slug ? "bg-lime text-ink" : "text-paper/75 hover:text-paper"}`}
+                className={`min-h-9 shrink-0 px-2 text-[0.72rem] font-semibold transition-colors ${active === p.slug ? "bg-lime text-ink" : "text-paper/75 hover:text-paper"}`}
               >
                 {p.name[lang]}
               </button>
@@ -95,7 +95,7 @@ export function Hero({ lang, t, nav, surface }: Props) {
 
   // Mobile: the viewfinder opens as it rises into view.
   const mRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress: mProg } = useScroll({ target: mRef, offset: ["start 95%", "start 35%"] });
+  const { scrollYProgress: mProg } = useScroll({ target: mRef, offset: ["start 72%", "start 25%"] });
   const openMobile = useSpring(useTransform(mProg, [0, 1], [0, 1]), { stiffness: 200, damping: 36 });
   const one = useTransform(p, () => 1);
 
@@ -113,6 +113,9 @@ export function Hero({ lang, t, nav, surface }: Props) {
   }, [sticky, px]);
 
   const open = reduced ? one : desktop ? openDesktop : openMobile;
+  const geo = desktop ? GEOMETRY.desktop : GEOMETRY.phone;
+  const stageRef = useRef<HTMLDivElement>(null);
+  useVerifyState(stageRef, sticky ? p : open);
 
   return (
     <section
@@ -122,7 +125,7 @@ export function Hero({ lang, t, nav, surface }: Props) {
       className={`relative ${sticky ? "h-[185vh]" : ""}`}
       data-sc-act={sticky ? "pin" : "flow"}
     >
-      <div className={`${sticky ? "sticky top-0 h-svh" : ""} relative overflow-hidden`}>
+      <div ref={stageRef} className={`${sticky ? "sticky top-0 h-svh" : "lg:min-h-svh"} relative grid overflow-hidden`}>
         {/* Far plane: plaster surface, smallest displacement */}
         <motion.div aria-hidden="true" className="absolute inset-0 -z-10 rtl:-scale-x-100" style={sticky ? { y: farY, scale: farS } : undefined}>
           {surface}
@@ -156,7 +159,7 @@ export function Hero({ lang, t, nav, surface }: Props) {
               dir="ltr"
             >
               <div className="grid-lines pointer-events-none absolute -inset-6 opacity-60 [mask-image:radial-gradient(closest-side,black,transparent)]" aria-hidden="true" />
-              <div className="relative" style={{ paddingBottom: `${PANEL_H * 100}%` }}>
+              <div className="relative" style={{ paddingBottom: `${geo.h * 100}%` }}>
                 <motion.svg
                   viewBox={`0 0 ${MARK_VIEWBOX.w} ${MARK_VIEWBOX.h}`}
                   className="absolute inset-x-0 top-0 h-auto w-full"
@@ -168,7 +171,7 @@ export function Hero({ lang, t, nav, surface }: Props) {
                   <path d={STROKE_B} className="fill-ink" />
                 </motion.svg>
                 <motion.div className="absolute inset-0" style={sticky ? { y: panelY, x: panelPX } : undefined}>
-                  <Viewfinder lang={lang} t={t} open={open} />
+                  <Viewfinder lang={lang} t={t} open={open} geo={geo} />
                 </motion.div>
               </div>
             </motion.div>

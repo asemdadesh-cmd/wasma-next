@@ -1,0 +1,14 @@
+import { chromium } from "playwright-core";
+const [url, out, w = "1440", h = "900", sel, offset = "0", wait = "1500"] = process.argv.slice(2);
+const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" });
+const page = await browser.newPage({ viewport: { width: +w, height: +h } });
+const errors = [];
+page.on("pageerror", (e) => errors.push(String(e)));
+page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+await page.goto(url, { waitUntil: "networkidle" });
+const y = await page.evaluate(([s, o]) => { const el = document.querySelector(s); return el.getBoundingClientRect().top + scrollY + Number(o) * innerHeight; }, [sel, offset]);
+await page.evaluate((v) => window.scrollTo(0, v), y);
+await page.waitForTimeout(+wait);
+await page.screenshot({ path: out });
+console.log(JSON.stringify({ y, errors }));
+await browser.close();

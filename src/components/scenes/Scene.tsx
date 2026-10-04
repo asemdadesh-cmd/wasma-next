@@ -43,7 +43,7 @@ export function Scene({ name, photo, alt, className = "", position = "50% 50%", 
   }
   const Art = ART[name];
   return (
-    <span role="img" aria-label={alt} className={`absolute inset-0 block ${className}`}>
+    <span {...(alt ? { role: "img", "aria-label": alt } : { "aria-hidden": true })} className={`absolute inset-0 block ${className}`}>
       <Art className="h-full w-full" idPrefix={idPrefix ?? name} />
     </span>
   );

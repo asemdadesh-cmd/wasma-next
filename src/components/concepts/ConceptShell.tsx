@@ -20,7 +20,7 @@ export function ConceptShell({ lang, slug, children }: Props) {
   return (
     <>
       <a href="#concept" className="skip-link">{t.skip}</a>
-      <div className="on-ink relative z-[60] bg-ink text-paper">
+      <aside aria-label="WASMA" className="on-ink relative z-[60] bg-ink text-paper">
         <div className="wrap flex min-h-11 items-center justify-between gap-4 py-1.5 text-[0.8rem]">
           <Link href={`/${lang}#chapter-${slug}`} className="flex min-h-9 items-center gap-2 font-semibold" aria-label={`${t.concept.back}, WASMA`}>
             <span dir="ltr"><Mark className="h-3.5 w-auto" inkClassName="fill-paper" /></span>
@@ -32,7 +32,7 @@ export function ConceptShell({ lang, slug, children }: Props) {
           </p>
           <LangSwitch lang={lang} label={t.nav.switchLabel} text={t.nav.switchTo} className="!min-h-9 !text-[0.8rem]" />
         </div>
-      </div>
+      </aside>
       <div id="concept">{children}</div>
       <aside aria-label={t.concept.next} className="on-ink bg-ink text-paper" data-sc-act="flow">
         <div className="wrap grid gap-8 py-16 md:grid-cols-2 md:items-end">

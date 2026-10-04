@@ -15,6 +15,7 @@ const C = { bg: "#EEF1F2", panel: "#FFFFFF", line: "#D3DADE", ink: "#0F1417", so
 
 const T = {
   search: { ar: "ابحث بالاسم أو الحيّ", en: "Search by name or district" },
+  filters: { ar: "الفلاتر", en: "Filters" },
   district: { ar: "الحيّ", en: "District" },
   all: { ar: "كل الأحياء", en: "All districts" },
   beds: { ar: "الغرف", en: "Bedrooms" },
@@ -133,6 +134,7 @@ export function MadarSite({ lang }: Props) {
   const [compare, setCompare] = useState<string[]>([]);
   const [view, setView] = useState<"list" | "map">("list");
   const [dialog, setDialog] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const dlg = useRef<HTMLDivElement>(null);
 
   const results = useMemo(() => {
@@ -202,8 +204,11 @@ export function MadarSite({ lang }: Props) {
           <span aria-live="polite" className="tabular hidden text-sm sm:block" style={{ color: C.soft }}>
             {results.length} {T.results[lang]}
           </span>
+          <button type="button" aria-expanded={filtersOpen} aria-controls="madar-filters" onClick={() => setFiltersOpen((v) => !v)} className="min-h-11 shrink-0 border px-3 text-sm font-semibold lg:hidden" style={{ borderColor: C.line }}>
+            {T.filters[lang]} <span className="tabular" style={{ color: C.soft }}>· {results.length}</span>
+          </button>
         </div>
-        <div className="grid gap-3 border-t px-[var(--gutter)] py-3 sm:grid-cols-2 lg:grid-cols-4" style={{ borderColor: C.line }}>
+        <div id="madar-filters" className={`${filtersOpen ? "grid" : "hidden"} gap-3 border-t px-[var(--gutter)] py-3 sm:grid-cols-2 lg:grid lg:grid-cols-4`} style={{ borderColor: C.line }}>
           <label className="text-xs" style={{ color: C.soft }}>
             {T.district[lang]}
             <select value={district} onChange={(e) => setDistrict(e.target.value)} className={`${control} mt-1`} style={{ borderColor: C.line, color: C.ink }}>
@@ -295,7 +300,7 @@ export function MadarSite({ lang }: Props) {
           <p className="mt-6 text-xs" style={{ color: C.soft }}>{T.sample[lang]}</p>
         </section>
         <section aria-label={T.map[lang]} className={`${view === "list" ? "hidden" : ""} lg:block`}>
-          <div className="sticky top-[13.5rem] h-[calc(100svh-14rem)] min-h-[22rem] lg:top-[9.5rem] lg:h-[calc(100svh-9.5rem)]">
+          <div className="sticky top-[6.25rem] h-[calc(100svh-7rem)] min-h-[22rem] lg:top-[9.5rem] lg:h-[calc(100svh-9.5rem)]">
             <MapView lang={lang} results={results} district={district} setDistrict={setDistrict} focus={focus} setFocus={focusFromMap} />
           </div>
         </section>

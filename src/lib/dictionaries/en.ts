@@ -21,7 +21,7 @@ const en: Dict = {
   },
   hero: {
     kicker: "Web & digital studio · Libya",
-    title: ["We make work", "that leaves a mark."],
+    title: ["Work that", "leaves a mark."],
     sub: "Websites and digital products, designed with care and built to work from the first tap.",
     primary: "Try the work",
     viewfinder: "Inside the square",

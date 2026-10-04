@@ -93,6 +93,7 @@ select {
   caret-color: currentColor;
 }
 
+@layer components {
 /* Display type: tight in Latin, generous in Arabic. */
 .display {
   font-weight: 650;
@@ -271,6 +272,8 @@ details > summary::-webkit-details-marker {
 .rail {
   scrollbar-width: thin;
   scrollbar-color: currentColor transparent;
+}
+
 }
 
 @media (prefers-reduced-motion: reduce) {

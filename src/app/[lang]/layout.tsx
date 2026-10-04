@@ -5,6 +5,7 @@ import "../globals.css";
 import { dirOf, hasLocale, locales } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 import { SITE } from "@/lib/site";
+import { ScrollReady } from "@/components/site/ScrollReady";
 
 const archivo = Archivo({
   subsets: ["latin"],
@@ -58,7 +59,10 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   if (!hasLocale(lang)) notFound();
   return (
     <html lang={lang} dir={dirOf(lang)} className={`${archivo.variable} ${readex.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ScrollReady />
+      </body>
     </html>
   );
 }
