@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # WASMA site: working notes for agents
 
 - Arabic is the default locale. Design RTL first; use logical utilities (`ms-`, `pe-`, `start-`, `end-`) and check every change in `/ar` and `/en`.
