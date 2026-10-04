@@ -1,14 +1,7 @@
 import Image from "next/image";
-import { NoteScene, NuraScene, SahraScene, StudioSurface } from "./Scenes";
+import { SCENES, type SceneName } from "./Layers";
 
-export type SceneName = "studio-surface" | "sahra-retreat" | "nura-objects" | "note-cafe";
-
-const ART = {
-  "studio-surface": StudioSurface,
-  "sahra-retreat": SahraScene,
-  "nura-objects": NuraScene,
-  "note-cafe": NoteScene,
-};
+export type { SceneName };
 
 type Props = {
   name: SceneName;
@@ -23,28 +16,33 @@ type Props = {
   idPrefix?: string;
 };
 
+/** The planes of a scene flattened into one SVG, for still placements. */
+export function SceneArt({ name, idPrefix, className = "h-full w-full" }: { name: SceneName; idPrefix: string; className?: string }) {
+  const planes = SCENES[name]((s) => `${idPrefix}-${s}`);
+  return (
+    <svg viewBox="0 0 1536 1024" preserveAspectRatio="xMidYMid slice" className={className} aria-hidden="true" focusable="false">
+      {planes.map((pl) => (
+        <g key={pl.key} opacity={pl.fade ? pl.fade[0] : undefined}>
+          {pl.node}
+        </g>
+      ))}
+    </svg>
+  );
+}
+
 /**
- * A photograph slot. Renders the supplied WebP when it exists, otherwise the
- * matching art-directed SVG scene. Both fill their container (object-cover).
+ * A still image slot: the supplied WebP when it exists, otherwise the
+ * illustrated scene. Fills its container.
  */
 export function Scene({ name, photo, alt, className = "", position = "50% 50%", priority, sizes = "100vw", idPrefix }: Props) {
   if (photo) {
     return (
-      <Image
-        src={`/images/${name}.webp`}
-        alt={alt}
-        fill
-        priority={priority}
-        sizes={sizes}
-        className={`object-cover ${className}`}
-        style={{ objectPosition: position }}
-      />
+      <Image src={`/images/${name}.webp`} alt={alt} fill priority={priority} sizes={sizes} className={`object-cover ${className}`} style={{ objectPosition: position }} />
     );
   }
-  const Art = ART[name];
   return (
     <span {...(alt ? { role: "img", "aria-label": alt } : { "aria-hidden": true })} className={`absolute inset-0 block ${className}`}>
-      <Art className="h-full w-full" idPrefix={idPrefix ?? name} />
+      <SceneArt name={name} idPrefix={idPrefix ?? name} />
     </span>
   );
 }

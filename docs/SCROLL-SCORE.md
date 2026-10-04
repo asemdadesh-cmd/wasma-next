@@ -75,9 +75,30 @@ Device families used: parallax, reveal, pin, flow, pan, draw, pointer. No family
 
 The lime square as viewfinder. In the hero it opens (clip-path from the square's own rectangle) into a live panel. In the gallery the square marks the active concept and frames the working demo. The chosen concept is stored in page state and pre-selects the project type in the brief form, so the selection carries to the end. The footer returns the square to its place in the mark.
 
+## Layered scenes (no photographs required)
+
+Every illustrated scene is cut into registered planes (`src/components/scenes/Layers.tsx`) that `MovingScene` drives at different rates, keeping total travel under ~200px as the hero-depth guide advises. Each scene also has one behaviour of its own:
+
+| Scene | Planes (far to near) | Its own movement |
+| --- | --- | --- |
+| Studio plaster (home hero) | plaster, stepped edge, sun shadow | the shadow rotates around the step as if the sun is moving |
+| SAHRA (featured, courtyard) | sea and sky, curtain, limestone walls, light, pool, olive branch | the curtain sways, warm light strengthens, the olive branch passes fastest and turns |
+| NURA (hero) | wall, cobalt edge light, steel table with objects, glint | the cobalt light drifts and brightens, a glint sweeps across the glass |
+| NŌTE (hero) | terracotta table, espresso, spoon, pastry, linen | the espresso turns, the pastry counter-rotates, the linen passes in front |
+
+Objects that touch a surface share its plane, so nothing floats off its contact line. A supplied photograph replaces the planes with one gently drifting plane (a single photo is never faked into layers).
+
 ## Mobile composition
 
-Composed separately, not shrunk: the hero stacks headline, mark and an opened viewfinder band with shorter travel; the gallery becomes a sequence of full-width concept rooms with inline demos (no sticky stage); the statement pans a shorter distance with smaller type; the featured scene uses a portrait window.
+Composed separately, not shrunk:
+
+- **Hero (pinned, 190vh).** The headline lifts and fades, stroke A slides off to the left and stroke B to the right, and the lime square grows (clip measured from the square's real rectangle) until a full-height working interface fills the screen.
+- **Gallery (stacked cards).** Each concept is a full-height sticky card; the next slides over it while the one beneath scales to 90% and dims. Every card's demo stays operable while on top.
+- **Statement.** Pans a shorter distance with smaller type.
+- **Featured (pinned, 230vh).** Opens from a tall portrait window, planes moving, copy rising on a solid card.
+- **Concepts.** SAHRA's courtyard reveal and NURA/NŌTE heroes use the same layered planes; NURA's products turn and lift as their sections pass.
+
+The server renders the phone, desktop and still heroes; CSS picks one on first paint and only the matching one stays mounted after hydration, so a phone never flashes the desktop layout.
 
 ## Reduced motion
 

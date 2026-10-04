@@ -4,7 +4,6 @@ import { Hero } from "@/components/home/Hero";
 import { Capabilities, Featured, Process, Reasons, Services, Statement } from "@/components/home/Sections";
 import { SelectionProvider } from "@/components/home/Selection";
 import { WorkGallery } from "@/components/home/WorkGallery";
-import { Scene } from "@/components/scenes/Scene";
 import { Footer } from "@/components/site/Footer";
 import { Nav } from "@/components/site/Nav";
 import { getDictionary } from "@/lib/dictionaries";
@@ -17,7 +16,6 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   if (!hasLocale(lang)) notFound();
   const t = getDictionary(lang);
   const photos = getPhotos();
-  const ar = lang === "ar";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -42,7 +40,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
             lang={lang}
             t={t.hero}
             nav={t.nav}
-            surface={<Scene name="studio-surface" photo={photos["studio-surface"]} alt="" priority position={ar ? "left center" : "center"} />}
+            surfacePhoto={photos["studio-surface"]}
           />
           <WorkGallery lang={lang} t={t.work} />
           <Capabilities t={t.capabilities} />
@@ -52,15 +50,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
           <Featured
             t={t.featured}
             lang={lang}
-            scene={
-              <Scene
-                name="sahra-retreat"
-                photo={photos["sahra-retreat"]}
-                alt={ar ? "منتجع صحرا الخيالي: فناء حجري ومسبح أزرق والبحر خلف ستارة كتّان" : "The fictional SAHRA retreat: a limestone courtyard, a cobalt pool and the sea beyond a linen curtain"}
-                position="56% 50%"
-                idPrefix="featured-sahra"
-              />
-            }
+            photo={photos["sahra-retreat"]}
           />
           <Services t={t.services} />
           <Contact lang={lang} t={t.contact} services={t.services.items} />

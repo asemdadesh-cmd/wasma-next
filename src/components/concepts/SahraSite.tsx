@@ -4,6 +4,7 @@ import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "fr
 import { Cormorant_Garamond, Noto_Naskh_Arabic } from "next/font/google";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Scene } from "@/components/scenes/Scene";
+import { MovingScene } from "@/components/scenes/MovingScene";
 import { useIsDesktop } from "@/hooks/useMedia";
 import { rooms, SAHRA_GUEST_SUPPLEMENT } from "@/lib/concept-data";
 import { formatLYD, type L, type Locale } from "@/lib/i18n";
@@ -123,11 +124,13 @@ function Courtyard({ lang, photos }: Props) {
   const textO = useTransform(p, [0.55, 0.8], [0, 1]);
 
   const scene = (
-    <Scene
+    <MovingScene
       name="sahra-retreat"
+      progress={p}
       photo={photos["sahra-retreat"]}
       alt={lang === "ar" ? "فناء حجري ومسبح أزرق والبحر خلف ستارة بيضاء" : "A limestone courtyard, a cobalt pool, and the sea beyond a white curtain"}
       position="56% 50%"
+      travel={desktop ? 170 : 120}
       idPrefix="sahra-court"
     />
   );

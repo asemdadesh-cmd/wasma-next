@@ -10,7 +10,7 @@ Run in the cloud build container on 2026-10-04 against the production build (`ne
 | `npm run lint` (eslint-config-next 16, core-web-vitals + TS) | Pass, 0 errors, 0 warnings |
 | `npm run build` (Next 16.3.8, Turbopack) | Pass. 12 pages prerendered as static HTML (`/ar`, `/en`, 10 concept pages); proxy, API route, OG image and catch-all are on-demand |
 
-## Functional checks: `scripts/verify.mjs` (63/63 pass)
+## Functional checks: `scripts/verify.mjs` (70/70 pass)
 
 Routing and language: `/` redirects to `/ar`; SSR HTML carries `lang="ar" dir="rtl"` and `lang="en" dir="ltr"`; the language switch keeps the path and stores a cookie that bare URLs honour; unknown paths return HTTP 404 with localized copy; unsupported locales redirect into Arabic.
 
@@ -21,6 +21,8 @@ Brief: empty submit shows a focused error summary and `aria-invalid` fields; a v
 Concepts: SAHRA estimate updates with room/guests, warns on over-capacity, prepares a request and states nothing is sent; NURA bag drawer is a modal dialog that merges identical lines, totals with delivery, closes on Escape and restores focus; NŌTE adds items with options, filters by diet, and opens show-to-staff mode (phone viewport); MADAR filters narrow results, compare opens a table dialog, empty state offers reset; SANAD validates details and offers a real `.ics` calendar file.
 
 Reduced motion: hero, statement and featured scene have no pinned travel; the viewfinder is shown open and operable.
+
+Phone choreography: one hero mounted after hydration; the phone hero is pinned, starts with the viewfinder closed and opens to over 75% of the screen on scroll; the gallery renders five stacked sticky cards that overlap while scrolling; no console errors.
 
 Mobile: menu button visible, desktop CTA hidden, modal menu opens and closes on Escape; no horizontal overflow at 390 px and at 360 px on all seven main routes.
 
@@ -42,6 +44,21 @@ The harness detects change through its own engine's cues, clips and `data-sc-ver
 
 Contrast is covered by axe (above); the harness reported no contrast or never-peaking-cue findings.
 
+## Scroll smoothness: `scripts/perf.mjs`
+
+Scripted scroll at 1400 px/s through each page, frame intervals recorded with `requestAnimationFrame`, headless Chromium with CPU throttling via DevTools Protocol.
+
+| Page | Viewport | CPU slowdown | Avg fps | p99 frame | Frames over 25 ms | Long tasks |
+| --- | --- | --- | --- | --- | --- | --- |
+| `/ar` | 390 × 844 | 4× | 60 | 16.8 ms | 0 | 0 |
+| `/ar` | 390 × 844 | 6× | 60 | 16.8 ms | 0 | 0 |
+| `/ar/work/sahra` | 390 × 844 | 6× | 59.8 | 16.8 ms | 1 | 0 |
+| `/ar/work/nura` | 390 × 844 | 4× | 60 | 16.8 ms | 0 | 0 |
+| `/ar/work/note` | 390 × 844 | 4× | 60 | 16.8 ms | 0 | 0 |
+| `/ar` | 1440 × 900 | 1× | 59.7 | 16.8 ms | 3 | 0 |
+
+What this measures: main-thread cost (scroll handlers, React updates, style recalculation) stays well inside the frame budget even on a throttled CPU. What it does not measure: real GPU rasterization and compositing on a phone. Headless Chromium rasterizes in software and its frame clock is not a real display, so treat these as evidence that the JavaScript is cheap, not as a device benchmark.
+
 ## Defects found during verification and fixed
 
 - Custom `.btn` CSS was unlayered and overrode Tailwind's `hidden`, so the desktop CTA showed on phones and pushed the menu button off-screen. Moved component CSS into `@layer components`.
@@ -53,10 +70,13 @@ Contrast is covered by axe (above); the harness reported no contrast or never-pe
 - English hero wrapped to four lines; shortened to two.
 - All routes rendered dynamically because the 404 read request headers; the 404 now derives its locale from the path and pages prerender.
 - SAHRA label sat blue-on-blue over the pool; moved to the dark band.
+- Phone hero (second round): the fading headline drew above the growing viewfinder; fixed stacking and faded it sooner. The open SAHRA demo left dead space on tall phones; its image band now grows to fill.
+- NURA hero copy had a hard-edged backdrop and, in Arabic, landed on the beige carton; the scene now mirrors in RTL and the backdrop is gone.
+- English desktop headline wrapped to three lines; English uses a smaller display size.
 
 ## Not verified
 
-- Real devices (iOS Safari, Android Chrome). Only headless Chromium was used; touch scrolling, iOS address-bar resizing and real-network performance were not measured.
+- Real devices (iOS Safari, Android Chrome). Only headless Chromium with touch emulation was used; real finger momentum, iOS address-bar resizing, GPU raster cost and real-network performance were not measured. Please open it on your phone and tell me anything that stutters.
 - Firefox and Safari engines.
 - Screen-reader output (VoiceOver/TalkBack) was not listened to; semantics were checked by axe and by inspecting roles and labels.
 - The live reference site could not be opened from the container (proxy 403), so it was compared only through the supplied screenshots.

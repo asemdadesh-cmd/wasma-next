@@ -1,9 +1,9 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
 import { El_Messiri, Fraunces } from "next/font/google";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Scene } from "@/components/scenes/Scene";
+import { MovingScene } from "@/components/scenes/MovingScene";
 import { dietNames, menu, menuCats, type Diet, type MenuItem } from "@/lib/concept-data";
 import { formatLYD, type Locale } from "@/lib/i18n";
 import type { PhotoMap } from "@/lib/photos";
@@ -191,6 +191,9 @@ export function NoteSite({ lang, photos }: Props) {
   const [orderOpen, setOrderOpen] = useState(false);
   const [staff, setStaff] = useState(false);
   const reduced = useReducedMotion();
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: heroP } = useScroll({ target: heroRef, offset: ["start end", "end start"] });
+  const heroS = useSpring(heroP, { stiffness: 300, damping: 42, mass: 0.3 });
   const staffRef = useRef<HTMLDivElement>(null);
   const closeItem = useCallback(() => setItem(null), []);
   const closeOrder = useCallback(() => setOrderOpen(false), []);
@@ -248,8 +251,8 @@ export function NoteSite({ lang, photos }: Props) {
               <h1 id="note-hello" className="text-[clamp(2.8rem,7vw,5rem)] italic leading-none">{T.hello[lang]}</h1>
               <p className="mt-4 max-w-[34ch] text-lg leading-relaxed" style={{ color: C.soft }}>{T.intro[lang]}</p>
             </div>
-            <div className="relative aspect-[3/2] overflow-hidden rounded-[1.75rem]">
-              <Scene name="note-cafe" photo={photos["note-cafe"]} alt={lang === "ar" ? "إسبريسو وكعكة مزجّجة على سطح أحمر طيني" : "Espresso and a glazed pastry on a terracotta surface"} priority idPrefix="note-hero" />
+            <div ref={heroRef} className="relative aspect-[3/2] overflow-hidden rounded-[1.75rem]">
+              <MovingScene name="note-cafe" progress={heroS} photo={photos["note-cafe"]} alt={lang === "ar" ? "إسبريسو وكعكة مزجّجة على سطح أحمر طيني" : "Espresso and a glazed pastry on a terracotta surface"} priority travel={110} idPrefix="note-hero" />
             </div>
           </section>
 

@@ -24,7 +24,7 @@ import {
 import { formatLYD, type Locale } from "@/lib/i18n";
 import type { ProjectSlug } from "@/lib/projects";
 import { NuraObject } from "./NuraObject";
-import { SahraScene } from "@/components/scenes/Scenes";
+import { SceneArt } from "@/components/scenes/Scene";
 
 type MiniProps = { lang: Locale; compact?: boolean };
 
@@ -62,10 +62,10 @@ export function SahraMini({ lang, compact }: MiniProps) {
         <span className="text-xl tracking-[0.3em]" style={{ fontFamily: SERIF }}>SAHRA</span>
         <span className="text-xs italic opacity-70">{ar ? "خطّط إقامتك" : "Plan your stay"}</span>
       </div>
-      <div className="relative h-20 shrink-0 overflow-hidden sm:h-24" aria-hidden="true">
-        <SahraScene className="absolute inset-0 h-full w-full" idPrefix={`mini-sahra-${compact ? "c" : "f"}`} />
+      <div className="relative min-h-20 flex-[1_1_5rem] overflow-hidden sm:min-h-24" style={{ maxHeight: "18rem" }} aria-hidden="true">
+        <SceneArt name="sahra-retreat" className="absolute inset-0 h-full w-full" idPrefix={`mini-sahra-${compact ? "c" : "f"}`} />
       </div>
-      <div className="grid flex-1 content-start gap-4 p-5">
+      <div className="grid shrink-0 content-start gap-4 p-5">
         <fieldset>
           <legend className="mb-2 text-xs uppercase tracking-widest opacity-70">{ar ? "الغرفة" : "Room"}</legend>
           <div className="grid grid-cols-3 gap-1.5">

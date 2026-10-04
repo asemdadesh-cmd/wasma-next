@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useIsDesktop } from "@/hooks/useMedia";
 import { useVerifyState } from "@/hooks/useVerifyState";
+import { MovingScene } from "@/components/scenes/MovingScene";
 import type { Dict } from "@/lib/dictionaries/ar";
 import type { Locale } from "@/lib/i18n";
 
@@ -211,29 +212,29 @@ export function Process({ t }: { t: Dict["process"] }) {
 }
 
 /* ── Featured: the courtyard window widens into SAHRA ─────────────── */
-export function Featured({ t, lang, scene }: { t: Dict["featured"]; lang: Locale; scene: React.ReactNode }) {
+export function Featured({ t, lang, photo }: { t: Dict["featured"]; lang: Locale; photo: boolean }) {
   const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
   const desktop = useIsDesktop();
-  const pinned = desktop && !reduced;
-  const { scrollYProgress } = useScroll({ target: ref, offset: pinned ? ["start start", "end end"] : ["start end", "center center"] });
-  const p = useSpring(scrollYProgress, { stiffness: 200, damping: 40, mass: 0.4 });
-  const clip = useTransform(p, pinned ? [0, 0.55] : [0, 1], pinned ? ["inset(18% 34% 18% 34%)", "inset(0% 0% 0% 0%)"] : ["inset(10% 14% 10% 14%)", "inset(0% 0% 0% 0%)"]);
-  const scale = useTransform(p, [0, 0.7], [1.18, 1]);
-  const copyY = useTransform(p, [0.45, 0.75], [60, 0]);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+  const p = useSpring(scrollYProgress, desktop ? { stiffness: 200, damping: 40, mass: 0.4 } : { stiffness: 340, damping: 44, mass: 0.3 });
+  // Desktop opens from a centred courtyard window; the phone from a tall portrait one.
+  const clip = useTransform(p, [0, 0.55], desktop ? ["inset(18% 34% 18% 34%)", "inset(0% 0% 0% 0%)"] : ["inset(14% 12% 30% 12%)", "inset(0% 0% 0% 0%)"]);
+  const copyY = useTransform(p, [0.45, 0.75], [80, 0]);
   const copyO = useTransform(p, [0.45, 0.7], [0, 1]);
   const labelO = useTransform(p, [0, 0.3], [1, 0]);
   const stage = useRef<HTMLDivElement>(null);
   useVerifyState(stage, p);
+  const alt = lang === "ar" ? "منتجع صحرا الخيالي: فناء حجري ومسبح أزرق والبحر خلف ستارة كتّان" : "The fictional SAHRA retreat: a limestone courtyard, a cobalt pool and the sea beyond a linen curtain";
 
   const copy = (
-    <div className="bg-paper p-6 text-ink shadow-[0_24px_48px_-24px_rgba(11,13,12,.5)] sm:p-8">
+    <div className="bg-paper p-5 text-ink shadow-[0_24px_48px_-24px_rgba(11,13,12,.5)] sm:p-8">
       <p className="text-sm font-medium text-mute">{t.kicker}</p>
-      <h2 id="featured-title" className="display mt-4 text-[clamp(2rem,3.6vw,3.4rem)]">
+      <h2 id="featured-title" className="display mt-3 text-[clamp(1.8rem,3.6vw,3.4rem)] sm:mt-4">
         {t.title}
       </h2>
-      <p className="pretty mt-5 text-lg leading-relaxed">{t.text}</p>
-      <ul className="mt-6 grid gap-2 text-[0.95rem]">
+      <p className="pretty mt-4 text-[1.05rem] leading-relaxed sm:mt-5 sm:text-lg">{t.text}</p>
+      <ul className="mt-5 hidden gap-2 text-[0.95rem] sm:grid">
         {t.points.map((pt) => (
           <li key={pt} className="flex gap-3">
             <span className="mt-[0.5em] size-2 shrink-0 bg-ink" aria-hidden="true" />
@@ -241,22 +242,20 @@ export function Featured({ t, lang, scene }: { t: Dict["featured"]; lang: Locale
           </li>
         ))}
       </ul>
-      <Link href={`/${lang}/work/sahra`} className="btn btn-ink mt-8">
+      <Link href={`/${lang}/work/sahra`} className="btn btn-ink mt-6 sm:mt-8">
         <span className="btn-square" aria-hidden="true" />
         {t.cta}
       </Link>
     </div>
   );
 
-  if (!pinned) {
+  if (reduced) {
     return (
-      <section ref={ref} aria-labelledby="featured-title" className="bg-ink py-[var(--section)]" data-sc-act="reveal">
+      <section ref={ref} aria-labelledby="featured-title" className="bg-ink py-[var(--section)]" data-sc-act="flow">
         <div className="wrap">
-          <motion.div className="relative aspect-[4/5] overflow-hidden sm:aspect-[3/2]" style={reduced ? undefined : { clipPath: clip }}>
-            <motion.div className="absolute inset-0" style={reduced ? undefined : { scale }}>
-              {scene}
-            </motion.div>
-          </motion.div>
+          <div className="relative aspect-[4/5] overflow-hidden sm:aspect-[3/2]">
+            <MovingScene name="sahra-retreat" progress={p} photo={photo} alt={alt} travel={0} position="56% 50%" idPrefix="featured-still" />
+          </div>
           <div className="-mt-10 px-3 sm:-mt-16 sm:px-10">{copy}</div>
         </div>
       </section>
@@ -267,14 +266,12 @@ export function Featured({ t, lang, scene }: { t: Dict["featured"]; lang: Locale
     <section ref={ref} aria-labelledby="featured-title" className="relative h-[230vh] bg-ink" data-sc-act="reveal">
       <div ref={stage} className="sticky top-0 h-svh overflow-hidden">
         <motion.div className="absolute inset-0" style={{ clipPath: clip }}>
-          <motion.div className="absolute inset-0" style={{ scale }}>
-            {scene}
-          </motion.div>
+          <MovingScene name="sahra-retreat" progress={p} photo={photo} alt={alt} travel={desktop ? 160 : 120} position="56% 50%" idPrefix="featured" />
         </motion.div>
-        <motion.p style={{ opacity: labelO }} className="absolute inset-x-0 top-[9%] text-center text-sm font-medium text-paper">
+        <motion.p style={{ opacity: labelO }} className="absolute inset-x-0 top-[7%] text-center text-sm font-medium text-paper">
           SAHRA · {lang === "ar" ? "صحرا" : "Coastal retreat"}
         </motion.p>
-        <div className="wrap relative flex h-full items-end pb-[6vh]">
+        <div className="wrap relative flex h-full items-end pb-4 sm:pb-[6vh]">
           <motion.div style={{ y: copyY, opacity: copyO }} className="w-full max-w-[34rem]">
             {copy}
           </motion.div>

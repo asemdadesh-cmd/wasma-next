@@ -1,10 +1,10 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import { Bricolage_Grotesque, Noto_Kufi_Arabic } from "next/font/google";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NuraObject } from "@/components/mini/NuraObject";
-import { Scene } from "@/components/scenes/Scene";
+import { MovingScene } from "@/components/scenes/MovingScene";
 import { products, type Product } from "@/lib/concept-data";
 import { formatLYD, type Locale } from "@/lib/i18n";
 import type { PhotoMap } from "@/lib/photos";
@@ -53,6 +53,26 @@ const T = {
   sample: { ar: "متجر تجريبي. المنتجات والأسعار خيالية.", en: "Demo shop. Products and prices are fictional." },
 };
 
+/* Phones have no pinned stage, so each object turns and lifts as its section passes. */
+function FloatingObject({ kind, color }: { kind: string; color: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const s = useSpring(scrollYProgress, { stiffness: 300, damping: 40, mass: 0.3 });
+  const rotate = useTransform(s, [0, 1], [-9, 9]);
+  const y = useTransform(s, [0, 1], [36, -36]);
+  const glow = useTransform(s, [0, 0.5, 1], [0.15, 0.45, 0.15]);
+  return (
+    <div ref={ref} className="relative my-8 flex h-72 items-center justify-center overflow-hidden lg:hidden" style={{ background: C.bg2 }}>
+      <motion.div aria-hidden="true" className="absolute inset-y-0 end-0 w-1/2 ltr:bg-gradient-to-l rtl:bg-gradient-to-r from-[#2F5BFF] to-transparent" style={{ opacity: reduced ? 0.3 : glow }} />
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-b from-[#6B7075] to-[#3E4246]" />
+      <motion.div style={reduced ? undefined : { rotate, y }} className="relative">
+        <NuraObject kind={kind} color={color} className="h-56 w-56" />
+      </motion.div>
+    </div>
+  );
+}
+
 function ProductSection({ p, lang, onAdd, selection, setSelection, index }: {
   p: Product;
   lang: Locale;
@@ -72,9 +92,7 @@ function ProductSection({ p, lang, onAdd, selection, setSelection, index }: {
       <p className="mt-5 max-w-[40ch] text-lg leading-relaxed" style={{ color: C.soft }}>{p.text[lang]}</p>
 
       {/* On phones the object sits inside the section; on desktop it is pinned beside it. */}
-      <div className="relative my-8 flex h-64 items-center justify-center lg:hidden" style={{ background: C.bg2 }}>
-        <NuraObject kind={p.id} color={p.finishes.find((f) => f.id === selection.finish)!.hex} className="h-56 w-56" />
-      </div>
+      <FloatingObject kind={p.id} color={p.finishes.find((f) => f.id === selection.finish)!.hex} />
 
       <fieldset className="mt-8">
         <legend className="text-sm" style={{ color: C.soft }}>
@@ -243,6 +261,10 @@ export function NuraSite({ lang, photos }: Props) {
   const reduced = useReducedMotion();
   const [active, setActive] = useState(0);
   const [bagOpen, setBagOpen] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress: heroP } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const heroS = useSpring(heroP, { stiffness: 300, damping: 42, mass: 0.3 });
+  const heroCopyY = useTransform(heroS, [0, 1], [0, -90]);
   const closeBag = useCallback(() => setBagOpen(false), []);
   const [lines, setLines] = useState<Line[]>([]);
   const [sel, setSel] = useState<Record<string, { size: string; finish: string }>>(
@@ -287,17 +309,18 @@ export function NuraSite({ lang, photos }: Props) {
       </header>
 
       <main>
-        <section className="relative min-h-[88svh] overflow-hidden" aria-labelledby="nura-title">
-          <div className="absolute inset-0">
-            <Scene name="nura-objects" photo={photos["nura-objects"]} alt={lang === "ar" ? "قارورة خضراء وبرطمان عاجي وعلبة ورقية على سطح معدني" : "A green bottle, an ivory jar and a paper carton on brushed metal"} position="68% 55%" priority idPrefix="nura-hero" />
+        <section ref={heroRef} className="relative min-h-[88svh] overflow-hidden" aria-labelledby="nura-title" data-sc-act="flow">
+          {/* Mirrored in Arabic so the copy always sits on the dark wall, never on the objects. */}
+          <div className="absolute inset-0 rtl:-scale-x-100">
+            <MovingScene name="nura-objects" progress={heroS} photo={photos["nura-objects"]} alt={lang === "ar" ? "قارورة خضراء وبرطمان عاجي وعلبة ورقية على سطح معدني" : "A green bottle, an ivory jar and a paper carton on brushed metal"} position="68% 55%" priority travel={200} idPrefix="nura-hero" />
           </div>
           {/* Contrast surface sized to the copy, over the dark upper-left wall */}
           <div className="relative flex min-h-[88svh] items-start px-[var(--gutter)] pt-[12vh]">
-            <div className="max-w-xl ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-[#141618] via-[#141618]/85 to-transparent p-0 pe-16">
+            <motion.div style={reduced ? undefined : { y: heroCopyY }} className="max-w-xl">
               <h1 id="nura-title" className="text-[clamp(3rem,7.5vw,6.8rem)] font-semibold leading-[0.92]">{T.hero[lang]}</h1>
               <p className="mt-6 max-w-[34ch] text-lg leading-relaxed" style={{ color: "#C9CCC6" }}>{T.heroSub[lang]}</p>
               <a href={`#p-${products[0].id}`} className="mt-8 inline-flex min-h-12 items-center px-6 font-semibold text-white" style={{ background: C.cobalt }}>{T.shop[lang]}</a>
-            </div>
+            </motion.div>
           </div>
         </section>
 

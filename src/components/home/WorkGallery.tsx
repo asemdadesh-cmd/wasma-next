@@ -1,10 +1,11 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform, type MotionValue } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { MINIS } from "@/components/mini/Minis";
 import { useIsDesktop } from "@/hooks/useMedia";
+import { useVerifyState } from "@/hooks/useVerifyState";
 import type { Dict } from "@/lib/dictionaries/ar";
 import type { Locale } from "@/lib/i18n";
 import { projects, type Project, type ProjectSlug } from "@/lib/projects";
@@ -163,6 +164,74 @@ function Stage({ lang, t }: Props) {
   );
 }
 
+/* Phone: concept cards stack. Each sticks, the next slides over it, and the one beneath recedes. */
+function StackCard({ p, i, n, lang, t, progress, reduced }: { p: Project; i: number; n: number; lang: Locale; t: Props["t"]; progress: MotionValue<number>; reduced: boolean | null }) {
+  const { setLiked } = useSelection();
+  const Mini = MINIS[p.slug];
+  const last = i === n - 1;
+  const range = [(i + 0.15) / n, (i + 1) / n];
+  const scale = useTransform(progress, range, [1, last ? 1 : 0.9]);
+  const dim = useTransform(progress, range, [0, last ? 0 : 0.55]);
+  const { className: voice, ...voiceStyle } = VOICE[p.slug];
+  return (
+    <article
+      id={`chapter-${p.slug}`}
+      aria-labelledby={`name-${p.slug}`}
+      className="sticky mb-4 last:mb-0"
+      style={{ top: `calc(var(--nav-h) + 0.75rem + ${i * 0.5}rem)`, zIndex: i + 1 }}
+    >
+      <motion.div
+        className="relative flex h-[calc(100svh-var(--nav-h)-1.5rem-2rem)] min-h-[34rem] origin-top flex-col overflow-hidden border border-ink bg-paper shadow-[0_-18px_40px_-24px_rgba(11,13,12,.45)]"
+        style={reduced ? undefined : { scale }}
+      >
+        <div className="px-4 pb-3 pt-4">
+          <div className="flex items-center gap-3 text-xs text-mute">
+            <span className="tabular font-semibold text-ink">{String(i + 1).padStart(2, "0")}</span>
+            <span>{p.kind[lang]}</span>
+            <span className="h-px flex-1 bg-line" aria-hidden="true" />
+            <span>{t.fictional}</span>
+          </div>
+          <div className="mt-3 flex items-end justify-between gap-3">
+            <h3 id={`name-${p.slug}`} className={`text-[2.6rem] leading-none ${voice}`} style={lang === "ar" ? { ...voiceStyle, letterSpacing: 0 } : voiceStyle}>
+              {p.name[lang]}
+            </h3>
+            <Palette colors={p.palette.slice(0, 4)} />
+          </div>
+          <p className="mt-3 line-clamp-2 text-[0.95rem] leading-snug text-mute">{p.pitch[lang]}</p>
+          <div className="mt-3 flex gap-2">
+            <Link href={`/${lang}/work/${p.slug}`} className="btn btn-ink !min-h-11 flex-1 justify-center !px-3 text-sm">
+              <span className="btn-square" aria-hidden="true" />
+              {t.open}
+            </Link>
+            <a href="#contact" onClick={() => setLiked(p.slug)} className="btn btn-line !min-h-11 !px-3 text-sm">
+              {t.like}
+            </a>
+          </div>
+        </div>
+        <div className="relative min-h-0 flex-1 border-t border-ink">
+          <Mini lang={lang} />
+          <span className="pointer-events-none absolute end-0 top-0 size-4 bg-lime" aria-hidden="true" />
+        </div>
+        <motion.div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ink" style={{ opacity: reduced ? 0 : dim }} />
+      </motion.div>
+    </article>
+  );
+}
+
+function PhoneStack({ lang, t }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+  useVerifyState(ref, scrollYProgress);
+  return (
+    <div ref={ref} className="mt-10">
+      {projects.map((p, i) => (
+        <StackCard key={p.slug} p={p} i={i} n={projects.length} lang={lang} t={t} progress={scrollYProgress} reduced={reduced} />
+      ))}
+    </div>
+  );
+}
+
 export function WorkGallery({ lang, t }: Props) {
   const desktop = useIsDesktop();
   const { active, setActive } = useSelection();
@@ -183,7 +252,7 @@ export function WorkGallery({ lang, t }: Props) {
   }, [desktop, setActive]);
 
   return (
-    <section id="work" aria-labelledby="work-title" className="relative border-t border-line bg-paper py-[var(--section)]" data-sc-act={desktop ? "pin" : "flow"}>
+    <section id="work" aria-labelledby="work-title" className="relative border-t border-line bg-paper py-[var(--section)]" data-sc-act="pin">
       <div className="wrap">
         <div className="grid gap-6 lg:grid-cols-12">
           <h2 id="work-title" className="display text-[clamp(2.6rem,6.4vw,6rem)] lg:col-span-8">
@@ -217,22 +286,7 @@ export function WorkGallery({ lang, t }: Props) {
             </div>
           </div>
         ) : (
-          <div className="mt-12">
-            {projects.map((p, i) => {
-              const Mini = MINIS[p.slug];
-              return (
-                <article key={p.slug} id={`chapter-${p.slug}`} aria-labelledby={`name-${p.slug}`} className="border-t border-line py-12">
-                  <div>
-                    <ChapterInfo p={p} lang={lang} t={t} index={i} />
-                  </div>
-                  <div className="relative mt-8 h-[min(34rem,125vw)] overflow-hidden border border-ink">
-                    <Mini lang={lang} />
-                    <span className="pointer-events-none absolute end-0 top-0 size-4 bg-lime" aria-hidden="true" />
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+          <PhoneStack lang={lang} t={t} />
         )}
       </div>
     </section>

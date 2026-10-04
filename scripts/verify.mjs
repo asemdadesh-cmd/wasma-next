@@ -265,6 +265,33 @@ const newPage = async (opts = {}) => {
   check("No horizontal overflow at 390px", overflow <= 0, String(overflow));
 }
 
+/* Phone choreography */
+{
+  const page = await newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  await page.goto(`${BASE}/ar`, { waitUntil: "networkidle" });
+  check("Only one hero mounted after hydration", (await page.locator("#top").count()) === 1);
+  check("Phone hero is pinned (has scroll travel)", (await page.evaluate(() => document.getElementById("top").offsetHeight / innerHeight)) > 1.6);
+  check("Phone viewfinder starts closed", await page.evaluate(() => document.querySelector("#top [inert]") !== null));
+  await page.evaluate(() => window.scrollTo(0, innerHeight * 0.75));
+  await page.waitForTimeout(900);
+  check("Phone viewfinder opens to fill the screen on scroll", await page.evaluate(() => {
+    const el = document.querySelector("#top [style*='clip-path']");
+    return document.querySelector("#top [inert]") === null && el && el.getBoundingClientRect().height > innerHeight * 0.75;
+  }));
+  const cards = page.locator("#work article.sticky");
+  check("Phone gallery renders five stacked sticky cards", (await cards.count()) === 5);
+  await page.locator("#chapter-nura").scrollIntoViewIfNeeded();
+  await page.evaluate(() => window.scrollBy(0, innerHeight * 0.9));
+  await page.waitForTimeout(600);
+  const stuck = await page.evaluate(() => {
+    const a = document.getElementById("chapter-sahra").getBoundingClientRect().top;
+    const b = document.getElementById("chapter-nura").getBoundingClientRect().top;
+    return Math.abs(a - b) < 40;
+  });
+  check("Cards stack on top of each other while scrolling", stuck);
+  check("No console errors on phone home", page.errors.length === 0, page.errors.join(" | "));
+}
+
 {
   const page = await newPage({ viewport: { width: 360, height: 640 } });
   for (const p of ["/ar", "/en", "/ar/work/sahra", "/ar/work/nura", "/ar/work/note", "/ar/work/madar", "/ar/work/sanad"]) {
