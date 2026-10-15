@@ -30,5 +30,5 @@ export function composeBrief(b: Brief, f: Dict["contact"]["form"], lang: Locale)
   return [f.greeting, "", ...rows.map(([k, v]) => `${k}: ${v}`), "", `${f.labels.message}:`, b.message.trim()].join("\n");
 }
 
-/** A sensible project type for each concept, by index into services.items. */
-export const LIKE_TO_SERVICE: Record<ProjectSlug, number> = { sahra: 3, nura: 1, note: 2, madar: 5, sanad: 3 };
+/** A sensible project type for each concept, by index into contact.form.types. */
+export const LIKE_TO_TYPE: Record<ProjectSlug, number> = { note: 0, sahra: 1, madar: 1, sanad: 2, nura: 3 };

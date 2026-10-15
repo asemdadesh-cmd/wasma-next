@@ -28,7 +28,7 @@ export function NotFoundBody({ copy }: { copy: Record<Locale, Copy> }) {
                 <span className="btn-square" aria-hidden="true" />
                 {t.notFound.home}
               </Link>
-              <Link href={`/${lang}#work`} className="btn btn-line">
+              <Link href={`/${lang}#samples`} className="btn btn-line">
                 {t.notFound.work}
               </Link>
             </div>

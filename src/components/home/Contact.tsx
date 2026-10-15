@@ -1,21 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { composeBrief, LIKE_TO_SERVICE, validateBrief, type Brief, type BriefErrors } from "@/lib/brief";
+import { composeBrief, LIKE_TO_TYPE, validateBrief, type Brief, type BriefErrors } from "@/lib/brief";
 import type { Dict } from "@/lib/dictionaries/ar";
 import type { Locale } from "@/lib/i18n";
 import { projects } from "@/lib/projects";
-import { mailtoHref, SITE, whatsappHref } from "@/lib/site";
+import { mailtoHref, whatsappHref } from "@/lib/site";
+import { Plate } from "@/components/proposal/Plate";
 import { useSelection } from "./Selection";
 
-type Props = { lang: Locale; t: Dict["contact"]; services: Dict["services"]["items"] };
+type Props = { lang: Locale; dict: Dict };
 
 const field =
   "mt-2 block w-full border-0 border-b-2 border-ink/25 bg-transparent px-0 py-3 text-lg outline-none transition-colors placeholder:text-mute/70 focus:border-ink aria-[invalid=true]:border-[#B3261E]";
 
-export function Contact({ lang, t, services }: Props) {
+export function Contact({ lang, dict }: Props) {
+  const t = dict.contact;
+  const tp = dict.proposal;
   const f = t.form;
-  const types = services.map((s) => s.name);
+  const types = f.types;
   const { liked, setLiked } = useSelection();
   const [b, setB] = useState<Brief>({ name: "", reach: "", type: "", like: "", timeline: "", message: "" });
   const [errors, setErrors] = useState<BriefErrors>({});
@@ -34,7 +37,7 @@ export function Contact({ lang, t, services }: Props) {
   const [seenLiked, setSeenLiked] = useState(liked);
   if (liked !== seenLiked) {
     setSeenLiked(liked);
-    if (liked) setB((cur) => ({ ...cur, like: liked, type: cur.type || types[LIKE_TO_SERVICE[liked]] }));
+    if (liked) setB((cur) => ({ ...cur, like: liked, type: cur.type || types[LIKE_TO_TYPE[liked]] }));
   }
 
   const set = (k: keyof Brief) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -58,39 +61,26 @@ export function Contact({ lang, t, services }: Props) {
   const describe = (k: keyof BriefErrors) => (errors[k] ? `${k}-error` : undefined);
 
   return (
-    <section id="contact" aria-labelledby="contact-title" className="grain bg-paper-2 py-[var(--section)]" data-sc-act="flow">
-      <div className="wrap grid gap-14 lg:grid-cols-12">
-        <div className="lg:col-span-5">
-          <h2 id="contact-title" className="display text-[clamp(2.8rem,6vw,5.6rem)]">
-            {t.title}
+    <section id="contact" aria-labelledby="contact-title" className="grain bg-paper-2 py-[var(--section)]" data-sc-act="reveal">
+      <div className="wrap">
+        <div className="grid gap-6 lg:grid-cols-12">
+          <h2 id="contact-title" className="display text-[clamp(2.4rem,5vw,4.8rem)] lg:col-span-8">
+            {tp.title}
           </h2>
-          <p className="pretty mt-6 max-w-[36ch] text-lg leading-relaxed">{t.lead}</p>
-          <p className="pretty mt-4 max-w-[40ch] text-[0.95rem] leading-relaxed text-mute">{t.honest}</p>
-
-          <div className="mt-12 border-t border-ink pt-6">
-            <p className="text-sm text-mute">{t.direct}</p>
-            <ul className="mt-4 grid gap-3">
-              <li>
-                <a href={`mailto:${SITE.email}`} className="group flex min-h-12 items-center justify-between gap-4 border-b border-line pb-3">
-                  <span className="text-sm text-mute">{t.email}</span>
-                  <span className="link-u break-all text-lg font-semibold" dir="ltr">
-                    {SITE.email}
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href={whatsappHref(f.greeting)} target="_blank" rel="noopener noreferrer" className="flex min-h-12 items-center justify-between gap-4 border-b border-line pb-3">
-                  <span className="text-sm text-mute">{t.whatsapp}</span>
-                  <span className="link-u tabular text-lg font-semibold" dir="ltr">
-                    {SITE.whatsappDisplay}
-                  </span>
-                </a>
-              </li>
-            </ul>
+          <p className="pretty max-w-[40ch] text-lg leading-relaxed text-ink/80 lg:col-span-4 lg:self-end">{tp.lead}</p>
+        </div>
+      </div>
+      <div className="wrap mt-[clamp(3rem,6vw,5rem)] grid gap-14 lg:grid-cols-12">
+        <div className="lg:col-span-5">
+          <div className="lg:sticky lg:top-[calc(var(--nav-h)+1.5rem)]">
+            <Plate lang={lang} t={dict} />
           </div>
         </div>
 
-        <div className="lg:col-span-7">
+        <div className="lg:col-span-6 lg:col-start-7">
+          <h3 className="text-[clamp(1.5rem,2.4vw,2rem)] font-semibold">{tp.brief}</h3>
+          <p className="pretty mt-2 max-w-[48ch] text-ink/75">{tp.briefLead} {t.honest}</p>
+          <div className="mt-8">
           {ready ? (
             <div className="bg-ink p-6 text-paper on-ink sm:p-10">
               <h3 ref={readyRef} tabIndex={-1} className="text-[clamp(1.8rem,3vw,2.6rem)] font-semibold outline-none">
@@ -216,6 +206,7 @@ export function Contact({ lang, t, services }: Props) {
               </div>
             </form>
           )}
+          </div>
         </div>
       </div>
     </section>

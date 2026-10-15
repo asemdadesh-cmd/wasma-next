@@ -4,6 +4,7 @@ import type { Dict } from "@/lib/dictionaries/ar";
 import type { Locale } from "@/lib/i18n";
 import { projects } from "@/lib/projects";
 import { SITE, whatsappHref } from "@/lib/site";
+import { PHOTOS, unsplashPage } from "@/lib/unsplash";
 import { LangSwitch } from "./Nav";
 
 type Props = { lang: Locale; t: Dict };
@@ -29,10 +30,10 @@ export function Footer({ lang, t }: Props) {
               <h2 className="text-sm text-mute-dark">{t.footer.explore}</h2>
               <ul className="mt-4 space-y-1">
                 {[
-                  [`${home}#work`, t.nav.work],
-                  [`${home}#capabilities`, t.nav.capabilities],
+                  [`${home}#scan`, t.nav.scan],
+                  [`${home}#packages`, t.nav.packages],
+                  [`${home}#samples`, t.nav.samples],
                   [`${home}#process`, t.nav.process],
-                  [`${home}#services`, t.nav.services],
                 ].map(([href, label]) => (
                   <li key={href}>
                     <Link href={href} className="inline-flex min-h-10 items-center">
@@ -82,11 +83,22 @@ export function Footer({ lang, t }: Props) {
           <Mark className="h-auto w-full max-w-[min(100%,72rem)]" inkClassName="fill-paper" title="WASMA" />
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-line-dark py-6 text-sm text-mute-dark sm:flex-row sm:items-center sm:justify-between">
+        <div className="grid gap-3 border-t border-line-dark py-6 text-sm text-mute-dark lg:grid-cols-[auto_auto_1fr_auto] lg:items-start lg:gap-8">
           <p>
             © {year} WASMA وسمة. {t.footer.rights}
           </p>
           <p>{t.footer.note}</p>
+          <p>
+            {t.footer.photos}{" "}
+            {Object.values(PHOTOS).map((ph, i, all) => (
+              <span key={ph.page}>
+                <a href={unsplashPage(ph.page)} target="_blank" rel="noopener noreferrer" className="underline decoration-paper/30 underline-offset-4 hover:text-paper" dir="ltr">
+                  {ph.by}
+                </a>
+                {i < all.length - 1 ? (lang === "ar" ? "، " : ", ") : "."}
+              </span>
+            ))}
+          </p>
           <a href="#top" className="inline-flex min-h-10 items-center text-paper">
             <span className="link-u">{t.footer.top}</span>
           </a>

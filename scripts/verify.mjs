@@ -14,7 +14,8 @@ const newPage = async (opts = {}) => {
   const page = await ctx.newPage();
   page.errors = [];
   page.on("pageerror", (e) => page.errors.push(String(e)));
-  page.on("console", (m) => m.type() === "error" && page.errors.push(m.text()));
+  // Unsplash photos are hotlinked; the build container cannot reach their CDN.
+  page.on("console", (m) => m.type() === "error" && !/ERR_TUNNEL_CONNECTION_FAILED|images\.unsplash\.com/.test(m.text() + (m.location()?.url ?? "")) && page.errors.push(m.text()));
   return page;
 };
 
@@ -52,41 +53,59 @@ const newPage = async (opts = {}) => {
   check("Unsupported locale redirects into Arabic", r3.status === 307 && (r3.headers.get("location") ?? "").includes("/ar/fr"));
 }
 
-/* Hero viewfinder, gallery, brief carry-over, contact */
+/* Signature move: the business switch regrades the page */
 {
   const page = await newPage();
   await page.goto(`${BASE}/ar`, { waitUntil: "networkidle" });
-  const inertAtTop = await page.evaluate(() => document.querySelector("#top [inert]") !== null);
-  check("Viewfinder is inert before it opens", inertAtTop);
-  await page.evaluate(() => window.scrollTo(0, innerHeight * 0.7));
+  check("Defaults to café", (await page.textContent("h1")).includes("منيو رقمي"));
+  await page.click('#top label:has-text("صالون أو عيادة")');
+  await page.waitForTimeout(500);
+  check("Hero headline regrades to salon", (await page.textContent("h1")).includes("حجوزات"));
+  check("Choice mirrored into ?for=", page.url().includes("for=salon"), page.url());
+  check("Header switch follows the hero", (await page.inputValue("header select")) === "salon");
+  check("Matching package row inverts (bookings)", (await page.textContent("#packages li.bg-ink h3")).includes("نظام حجز"));
+  check("Scan act links the salon demo", (await page.getAttribute('#scan a:has-text("افتح المثال")', "href")) === "/ar/work/sanad");
+  check("Scan act carries a real QR code", (await page.locator('#scan svg[role="img"][aria-label*="سند"] path').count()) === 1);
+  await page.selectOption("header select", "shop");
+  await page.waitForTimeout(500);
+  check("Header switch regrades too", (await page.textContent("h1")).includes("محلّك"));
+  check("Samples rail leads with the visitor's kind", (await page.locator("#samples li").first().getAttribute("id")) === "sample-nura");
+  await page.locator("#contact").scrollIntoViewIfNeeded();
+  await page.fill("[data-plate] input", "دكان الزهراء");
+  const plate = await page.getAttribute("[data-plate] a", "href");
+  const msg = decodeURIComponent(plate ?? "");
+  check("Proposal plate sends to +218 91 330 9237", plate?.startsWith("https://wa.me/218913309237?text="));
+  check("Proposal message carries package and business name", msg.includes("موقع لمحلّك أو شركتك") && msg.includes("دكان الزهراء"), msg);
+  check("Plate shows the starting price", (await page.textContent("[data-plate]")).includes("1,500"));
+  check("No console errors on regrade", page.errors.length === 0, page.errors.join(" | "));
+}
+
+/* Shared link opens tailored */
+{
+  const page = await newPage();
+  await page.goto(`${BASE}/en?for=property`, { waitUntil: "networkidle" });
+  check("?for=property opens tailored", (await page.textContent("h1")).includes("listings on a map"));
+  check("No hydration errors on a tailored link", page.errors.length === 0, page.errors.join(" | "));
+}
+
+/* Peak: the scan act pins and the phone becomes operable */
+{
+  const page = await newPage();
+  await page.goto(`${BASE}/ar`, { waitUntil: "networkidle" });
+  const h = await page.evaluate(() => document.getElementById("scan").offsetHeight / innerHeight);
+  check("Scan act is the longest pinned span", h > 3, h.toFixed(2));
+  const pan = await page.evaluate(() => document.getElementById("samples").offsetHeight / innerHeight);
+  check("Pan act shorter than the peak", pan < h, pan.toFixed(2));
+  check("Phone is inert before the scan", await page.evaluate(() => !!document.querySelector("#scan [inert]")));
+  await page.evaluate(() => { const s = document.getElementById("scan"); window.scrollTo(0, s.offsetTop + (s.offsetHeight - innerHeight) * 0.8); });
   await page.waitForTimeout(900);
-  const opened = await page.evaluate(() => document.querySelector("#top [inert]") === null);
-  check("Viewfinder opens and becomes operable on scroll", opened);
-  await page.click('#top button:has-text("نوتة")');
-  await page.waitForTimeout(300);
-  check("Viewfinder switches concept (NŌTE menu)", await page.isVisible('#top :text("طاولة 4")'));
-  // Use a control inside the viewfinder
-  await page.click('#top button[aria-label="إضافة إسبريسو"]');
-  check("Viewfinder demo updates its order total", (await page.textContent("#top")).includes("طلبك: 1 أصناف"));
+  check("Phone operable after the scan", await page.evaluate(() => !document.querySelector("#scan [inert]")));
+  await page.click('#scan button[aria-label="إضافة إسبريسو"]');
+  check("Scanned demo works (order total updates)", (await page.textContent("#scan")).includes("طلبك: 1 أصناف"));
 
-  // Gallery tabs with keyboard (RTL: ArrowLeft = next)
-  await page.locator("#work").scrollIntoViewIfNeeded();
-  await page.focus('[role="tab"][aria-selected="true"]');
-  const before = await page.getAttribute('[role="tab"][aria-selected="true"]', "id");
-  await page.keyboard.press("ArrowLeft");
-  await page.waitForTimeout(1200);
-  const after = await page.getAttribute('[role="tab"][aria-selected="true"]', "id");
-  check("Gallery tabs respond to arrow keys", before !== after, `${before} -> ${after}`);
-
-  // NURA mini on stage: add to bag
-  await page.click('#tab-nura');
-  await page.waitForTimeout(1300);
-  await page.click('#work-stage button:has-text("أضف إلى الحقيبة")');
-  check("Gallery NURA demo adds to bag", (await page.textContent("#work-stage")).includes("(1)"));
-
-  // "I want something like this" carries into brief
-  await page.click('#chapter-madar a:has-text("أريد شيئًا كهذا")');
-  await page.waitForTimeout(1200);
+  // Concept page CTA carries a concept into the brief
+  await page.goto(`${BASE}/ar?like=madar#contact`, { waitUntil: "networkidle" });
+  await page.waitForTimeout(600);
   const likeChecked = await page.isChecked('input[name="like"][value="madar"]');
   const typeVal = await page.inputValue("#f-type");
   check("Chosen concept is pre-selected in the brief", likeChecked, typeVal);
@@ -240,14 +259,12 @@ const newPage = async (opts = {}) => {
 {
   const page = await newPage({ reducedMotion: "reduce" });
   await page.goto(`${BASE}/ar`, { waitUntil: "networkidle" });
-  const heroH = await page.evaluate(() => document.getElementById("top").offsetHeight / innerHeight);
-  check("Reduced motion: hero has no pinned travel", heroH < 1.4, heroH.toFixed(2));
-  const vfOpen = await page.evaluate(() => document.querySelector("#top [inert]") === null);
-  check("Reduced motion: viewfinder shown open and operable", vfOpen);
-  const stH = await page.evaluate(() => document.getElementById("statement").closest("section").offsetHeight / innerHeight);
-  check("Reduced motion: statement is static", stH < 1.6, stH.toFixed(2));
-  const feat = await page.evaluate(() => document.getElementById("featured-title").closest("section").offsetHeight / innerHeight);
-  check("Reduced motion: featured scene has no pinned travel", feat < 2, feat.toFixed(2));
+  const scanH = await page.evaluate(() => document.getElementById("scan").offsetHeight / innerHeight);
+  check("Reduced motion: scan act has no pinned travel", scanH < 1.8, scanH.toFixed(2));
+  check("Reduced motion: scan phone operable", await page.evaluate(() => !document.querySelector("#scan [inert]")));
+  const panH = await page.evaluate(() => document.getElementById("samples").offsetHeight / innerHeight);
+  check("Reduced motion: samples become a swipe rail", panH < 1.8, panH.toFixed(2));
+  check("Reduced motion: no hydration errors", page.errors.length === 0, page.errors.join(" | "));
 }
 
 /* Mobile menu */
@@ -265,30 +282,13 @@ const newPage = async (opts = {}) => {
   check("No horizontal overflow at 390px", overflow <= 0, String(overflow));
 }
 
-/* Phone choreography */
+/* Phone composition */
 {
   const page = await newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await page.goto(`${BASE}/ar`, { waitUntil: "networkidle" });
-  check("Only one hero mounted after hydration", (await page.locator("#top").count()) === 1);
-  check("Phone hero is pinned (has scroll travel)", (await page.evaluate(() => document.getElementById("top").offsetHeight / innerHeight)) > 1.6);
-  check("Phone viewfinder starts closed", await page.evaluate(() => document.querySelector("#top [inert]") !== null));
-  await page.evaluate(() => window.scrollTo(0, innerHeight * 0.75));
-  await page.waitForTimeout(900);
-  check("Phone viewfinder opens to fill the screen on scroll", await page.evaluate(() => {
-    const el = document.querySelector("#top [style*='clip-path']");
-    return document.querySelector("#top [inert]") === null && el && el.getBoundingClientRect().height > innerHeight * 0.75;
-  }));
-  const cards = page.locator("#work article.sticky");
-  check("Phone gallery renders five stacked sticky cards", (await cards.count()) === 5);
-  await page.locator("#chapter-nura").scrollIntoViewIfNeeded();
-  await page.evaluate(() => window.scrollBy(0, innerHeight * 0.9));
-  await page.waitForTimeout(600);
-  const stuck = await page.evaluate(() => {
-    const a = document.getElementById("chapter-sahra").getBoundingClientRect().top;
-    const b = document.getElementById("chapter-nura").getBoundingClientRect().top;
-    return Math.abs(a - b) < 40;
-  });
-  check("Cards stack on top of each other while scrolling", stuck);
+  check("Phone: scan act is not pinned", (await page.evaluate(() => document.getElementById("scan").offsetHeight / innerHeight)) < 1.8);
+  check("Phone: open-the-demo button visible", await page.isVisible('#scan a:has-text("افتح المثال على هذا الهاتف")'));
+  check("Phone: samples rail swipes", await page.evaluate(() => { const r = document.querySelector("#samples ul"); return r.scrollWidth > r.clientWidth; }));
   check("No console errors on phone home", page.errors.length === 0, page.errors.join(" | "));
 }
 

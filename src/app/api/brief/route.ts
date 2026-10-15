@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   const f = t.contact.form;
   const get = (k: string) => String(form.get(k) ?? "").slice(0, 4000);
   const b: Brief = { name: get("name"), reach: get("reach"), type: get("type"), like: get("like"), timeline: get("timeline"), message: get("message") };
-  const errors = validateBrief(b, f, t.services.items.map((s) => s.name));
+  const errors = validateBrief(b, f, f.types);
   const ok = Object.keys(errors).length === 0;
   const message = ok ? composeBrief(b, f, lang) : "";
 

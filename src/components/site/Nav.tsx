@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/brand/Mark";
+import { BusinessSelect, HeaderCta } from "@/components/proposal/Business";
 import type { Dict } from "@/lib/dictionaries/ar";
 import { type Locale, otherLocale, switchLocalePath } from "@/lib/i18n";
 
-type Props = { lang: Locale; t: Dict["nav"] };
+/** Passing `dict` tailors the bar: business switch and a prefilled WhatsApp. Needs the home page's BusinessProvider. */
+type Props = { lang: Locale; t: Dict["nav"]; dict?: Dict };
 
 export function rememberLocale(lang: Locale) {
   document.cookie = `wasma-lang=${lang}; path=/; max-age=31536000; samesite=lax`;
@@ -30,7 +32,7 @@ export function LangSwitch({ lang, label, text, className = "" }: { lang: Locale
   );
 }
 
-export function Nav({ lang, t }: Props) {
+export function Nav({ lang, t, dict }: Props) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -38,10 +40,10 @@ export function Nav({ lang, t }: Props) {
   const home = `/${lang}`;
 
   const links = [
-    { href: `${home}#work`, label: t.work },
-    { href: `${home}#capabilities`, label: t.capabilities },
+    { href: `${home}#scan`, label: t.scan },
+    { href: `${home}#packages`, label: t.packages },
+    { href: `${home}#samples`, label: t.samples },
     { href: `${home}#process`, label: t.process },
-    { href: `${home}#services`, label: t.services },
   ];
 
   useEffect(() => {
@@ -96,29 +98,20 @@ export function Nav({ lang, t }: Props) {
           <Logo lang={lang} />
         </Link>
 
-        <nav aria-label={t.label} className="hidden items-center gap-1 lg:flex">
-          {links.map((l) => (
-            <Link key={l.href} href={l.href} className="inline-flex min-h-11 items-center px-3 text-[0.95rem] font-medium">
-              <span className="link-u">{l.label}</span>
-            </Link>
-          ))}
-        </nav>
+        {dict && <BusinessSelect t={dict.biz} />}
 
         <div className="flex items-center gap-2 sm:gap-3">
           <LangSwitch lang={lang} label={t.switchLabel} text={t.switchTo} />
-          <Link href={`${home}#contact`} className="btn btn-ink hidden !min-h-11 text-[0.95rem] md:inline-flex">
-            <span className="btn-square" aria-hidden="true" />
-            {t.contact}
-          </Link>
+          <HeaderCta dict={dict} label={t.whatsapp} />
           <button
             ref={buttonRef}
             type="button"
-            className="inline-flex size-11 items-center justify-center lg:hidden"
+            className="inline-flex min-h-11 items-center justify-center gap-3 px-1"
             aria-expanded={open}
             aria-controls="site-menu"
             onClick={() => setOpen((v) => !v)}
           >
-            <span className="sr-only">{open ? t.close : t.menu}</span>
+            <span className="sr-only lg:not-sr-only lg:text-[0.95rem] lg:font-semibold">{open ? t.close : t.menu}</span>
             <span aria-hidden="true" className="relative block h-3 w-7">
               <span className={`absolute inset-x-0 top-0 h-[2px] bg-ink transition-transform duration-200 ${open ? "translate-y-[5px] rotate-45" : ""}`} />
               <span className={`absolute inset-x-0 bottom-0 h-[2px] bg-ink transition-transform duration-200 ${open ? "-translate-y-[5px] -rotate-45" : ""}`} />
@@ -134,7 +127,7 @@ export function Nav({ lang, t }: Props) {
         aria-modal="true"
         aria-label={t.menu}
         hidden={!open}
-        className="fixed inset-x-0 bottom-0 top-[var(--nav-h)] overflow-y-auto bg-paper lg:hidden"
+        className="fixed inset-x-0 bottom-0 top-[var(--nav-h)] overflow-y-auto bg-paper"
       >
         <nav aria-label={t.label} className="wrap flex min-h-full flex-col justify-between pb-10 pt-6">
           <ul className="border-t border-line">

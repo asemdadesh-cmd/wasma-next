@@ -22,7 +22,7 @@ export function ConceptShell({ lang, slug, children }: Props) {
       <a href="#concept" className="skip-link">{t.skip}</a>
       <aside aria-label="WASMA" className="on-ink relative z-[60] bg-ink text-paper">
         <div className="wrap flex min-h-11 items-center justify-between gap-4 py-1.5 text-[0.8rem]">
-          <Link href={`/${lang}#chapter-${slug}`} className="flex min-h-9 items-center gap-2 font-semibold" aria-label={`${t.concept.back}, WASMA`}>
+          <Link href={`/${lang}#sample-${slug}`} className="flex min-h-9 items-center gap-2 font-semibold" aria-label={`${t.concept.back}, WASMA`}>
             <span dir="ltr"><Mark className="h-3.5 w-auto" inkClassName="fill-paper" /></span>
             <span className="hidden sm:inline">{t.concept.back}</span>
           </Link>
@@ -37,7 +37,7 @@ export function ConceptShell({ lang, slug, children }: Props) {
       <aside aria-label={t.concept.next} className="on-ink bg-ink text-paper" data-sc-act="flow">
         <div className="wrap grid gap-8 py-16 md:grid-cols-2 md:items-end">
           <div>
-            <p className="text-sm text-mute-dark">{t.work.fictional} · {p.kind[lang]}</p>
+            <p className="text-sm text-mute-dark">{t.samples.fictional} · {p.kind[lang]}</p>
             <p className="display mt-3 text-[clamp(2rem,4vw,3.4rem)]">{t.concept.want}</p>
             <Link href={`/${lang}?like=${slug}#contact`} className="btn btn-lime mt-8">
               {t.nav.contact}

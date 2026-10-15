@@ -1,117 +1,73 @@
-# WASMA next: Scroll Craft plan
+# WASMA home: Scroll Craft plan (tailored proposal)
 
-Self-authored under explicit creative delegation. The user wrote: "You have creative authority. Make routine decisions yourself." Evidence comes from `docs/BRIEF.md`, `docs/ASSET-GUIDE.md`, the supplied logo collage (`docs/brand/wasma-logo-collage.jpg`) and two screenshots of the previous site (`docs/reference/`). The live reference URL could not be opened from the build container (network policy returned 403), so the previous site was judged from the screenshots only.
+Self-authored under explicit creative delegation; the brief, quotes and feeling curve are in `scrollcraft/builds/wasma-proposal/BRIEF.md`. This replaces the earlier "gallery with editorial interludes" build, whose row stays in `scrollcraft/FINGERPRINTS.md`.
 
-Skill used: [scroll-craft](https://github.com/nateherkai/scroll-craft) 0.3.x, vendored at `.claude/skills/scroll-craft` (MIT). The engine (`scrollcraft.js`) is not used at runtime because the brief requires Next.js and Framer Motion. Its method is applied instead: brief, journey, grammar, fingerprint gate, feeling curve, device score, signature move, the taste floor, and the `shoot.mjs` verification harness. Sections carry `data-sc-act` markers so the harness samples within each scene.
+Skill: [scroll-craft](https://github.com/nateherkai/scroll-craft), vendored at `.claude/skills/scroll-craft`. The engine is not used at runtime (Next.js and Framer Motion); its method is: brief, journey, grammar, fingerprint gate, feeling curve, score, signature move, taste floor, verification harness. Sections carry `data-sc-act` for `shoot.mjs`.
 
-## The eight topics
+## Journey
 
-1. **Vibe.** Premium creative studio, European editorial, Swiss typography, subtle brutalism, experimental but usable, polished and fun (from BRIEF.md).
-2. **Journey.** Navigation, hero, selected work, capabilities, statement, reasons, process, featured project, services, contact, footer (the eleven requested sections).
-3. **Energy.** Quiet opening, rising curiosity, a loud interactive peak in the work gallery, a calm methods interlude, an immersive featured scene, then a direct and practical close.
-4. **Feeling and the one moment.** See the curve below. The moment: "The little square in their logo let me look into and try completely different websites."
-5. **What no other site does.** The detached lime square is a viewfinder. It opens into working miniature products, and the visitor's chosen product follows them into the brief form.
-6. **Distance from premium-minimal.** Editorial with restrained brutalism: hard rules, square corners, exposed grid, oversized type. Not maximalist.
-7. **One world or scenes.** Distinct scenes with hard cuts between paper and ink grounds. No continuous camera flight.
-8. **Assets.** The logo collage (vector reconstructed in `src/components/brand/Mark.tsx`). The four photographs named in ASSET-GUIDE.md were not present in this workspace, so every image slot ships an art-directed SVG scene and switches to the photograph automatically when the file is added (see `docs/IMAGE-REQUESTS.md`).
+1. Recognition: your kind of place, your kind of site on a phone.
+2. Tension: the worn menu, the missed DMs, said plainly.
+3. Turn (peak): scan it, and it is real.
+4. Substance: clear packages with "from" prices.
+5. Range: five working samples.
+6. Method: one message to launch.
+7. Commitment: send the proposal on WhatsApp.
 
-## Journey beats
+## Grammar: tailored proposal (new)
 
-1. Recognition: the exact WASMA mark, at scale, with a plain promise.
-2. Curiosity: the lime square opens, and there is something live inside.
-3. Desire (peak): five working concepts, each with its own language, tried in place.
-4. Clarity: what the studio actually does, in disclosures with real deliverables.
-5. Conviction: one sentence that travels across the page.
-6. Confidence: reasons and a method you can follow.
-7. Immersion: one concept, image-led, entered as a place.
-8. Resolve: services, then a brief that already knows what you liked.
+The page is a proposal addressed to the visitor's kind of business, not a studio portfolio.
 
-## Grammar
-
-**Gallery with editorial interludes** ("exhibition" grammar). The page is an exhibition of functioning objects. The gallery act is the unit of value; the editorial acts are wall texts between rooms. Filmic one-shot lost because the visitor must be able to stop and operate things. Live surface lost because WASMA is a studio, not a single product. Continuous world lost because nothing here is a journey through a place. Typographic poster lost because the work has to be seen. Chaptered editorial lost because chapters would bury the demos. Split stage is used locally inside the gallery only.
-
-Bans honoured: no scroll cue, no `01 / 06` counters (numbers appear only in the process, where sequence is information), no em dashes in visible copy, no glassmorphism, no glow, no gradient text, no identical card grids.
+- **Nav:** the bar's main control is a business switch (native select), plus language and a WhatsApp CTA that carries the choice. Section anchors live in the menu, on every screen size.
+- **Sequence:** recognition, friction, proof, price, range, method, proposal. Price comes before the portfolio because owners ask "how much" first (launch plan).
+- **Ending:** a proposal plate, a short document filled in from the page's state, with one send button.
+- **Bans:** generic studio claims (no reasons ledger, no statement banner), card grids, kinetic type, the old logo viewfinder, any price without "from".
 
 ## Fingerprint gate
 
-The registry (`scrollcraft/FINGERPRINTS.md`) was empty, so this first build has nothing to clear. Its row is recorded there.
+Against the only row (`wasma-next`, gallery with editorial interludes):
 
-## Feeling curve
+| Dimension | wasma-next | This build | Differs |
+| --- | --- | --- | --- |
+| Grammar | Gallery with editorial interludes | Tailored proposal | Yes |
+| Nav | Four anchors, one CTA | Business switch, anchors in the menu, WhatsApp CTA carrying state | Yes |
+| Hero device | Clip-path opening from the logo square | Photo, phone and QR table card as independent parallax and pointer planes | Yes |
+| Act shape | 11 acts, gallery peak, 19 vh | 7 acts, pinned scan peak, pan, 13.2 vh | Yes |
+| Close | Brief composing a WhatsApp/email hand-off | Proposal plate from page state, brief form secondary | Partly; both end in WhatsApp, honestly similar |
+| Signature | Square viewfinder into mini-sites | Business switch regrades every act | Yes |
 
-| Act | Feeling | What causes it |
-| --- | --- | --- |
-| Hero | Recognition | The supplied mark drawn exactly, large, on a warm plaster plane |
-| Viewfinder | Curiosity | The lime square grows into a window with a live interface inside |
-| Work gallery (peak) | Desire, play | Changing a finish, a night count, a menu filter, a map district, and seeing it respond |
-| Capabilities | Clarity | Plain disclosures listing what is actually delivered |
-| Statement | Conviction | One sentence moving in the reading direction across a dark ground |
-| Reasons | Trust | A ledger of specific commitments, revealed row by row |
-| Process | Calm control | A line drawn through five steps as you read them |
-| Featured SAHRA | Immersion | The courtyard opening widens until the scene fills the screen |
-| Services | Practicality | A dense, honest list with scope and outputs |
-| Contact | Resolve | A brief already carrying the concept the visitor chose |
-| Footer | Belonging | The mark returns whole, the square back in its place |
-
-No two adjacent acts share a feeling. The peak (work gallery) has the largest span on desktop (one sticky chapter per concept).
+5 of 6. Passes.
 
 ## Score
 
-| Act | Device | Why |
-| --- | --- | --- |
-| Hero | `parallax` (three independent planes) | Depth from surface, mark and live plane moving at different rates |
-| Viewfinder | `reveal` (clip-path opening) | A change of state: the brand becomes a window |
-| Work gallery | `pin` (sticky stage, chapter-driven) + pointer/keyboard | The stage holds while the visitor operates it |
-| Capabilities | `flow` + disclosures | Reading, not watching |
-| Statement | `pan` (direction-aware) | Lateral travel in the reading direction (right to left in Arabic) |
-| Reasons | `reveal` (row wipes) | Each commitment arrives as a ruled entry |
-| Process | `draw` (`--p` driven SVG stroke) | Progress made visible |
-| Featured | `reveal` + `parallax` (window widens, scene drifts) | Entering a place |
-| Services | `flow` | Practical information needs stillness |
-| Contact | pointer, form | The page stops moving and starts responding |
-
-Device families used: parallax, reveal, pin, flow, pan, draw, pointer. No family twice in a row.
-
-## Signature move
-
-The lime square as viewfinder. In the hero it opens (clip-path from the square's own rectangle) into a live panel. In the gallery the square marks the active concept and frames the working demo. The chosen concept is stored in page state and pre-selects the project type in the brief form, so the selection carries to the end. The footer returns the square to its place in the mark.
-
-## Layered scenes (no photographs required)
-
-Every illustrated scene is cut into registered planes (`src/components/scenes/Layers.tsx`) that `MovingScene` drives at different rates, keeping total travel under ~200px as the hero-depth guide advises. Each scene also has one behaviour of its own:
-
-| Scene | Planes (far to near) | Its own movement |
-| --- | --- | --- |
-| Studio plaster (home hero) | plaster, stepped edge, sun shadow | the shadow rotates around the step as if the sun is moving |
-| SAHRA (featured, courtyard) | sea and sky, curtain, limestone walls, light, pool, olive branch | the curtain sways, warm light strengthens, the olive branch passes fastest and turns |
-| NURA (hero) | wall, cobalt edge light, steel table with objects, glint | the cobalt light drifts and brightens, a glint sweeps across the glass |
-| NŌTE (hero) | terracotta table, espresso, spoon, pastry, linen | the espresso turns, the pastry counter-rotates, the linen passes in front |
-
-Objects that touch a surface share its plane, so nothing floats off its contact line. A supplied photograph replaces the planes with one gently drifting plane (a single photo is never faked into layers).
-
-## Mobile composition
-
-Composed separately, not shrunk:
-
-- **Hero (pinned, 190vh).** The headline lifts and fades, stroke A slides off to the left and stroke B to the right, and the lime square grows (clip measured from the square's real rectangle) until a full-height working interface fills the screen.
-- **Gallery (stacked cards).** Each concept is a full-height sticky card; the next slides over it while the one beneath scales to 90% and dims. Every card's demo stays operable while on top.
-- **Statement.** Pans a shorter distance with smaller type.
-- **Featured (pinned, 230vh).** Opens from a tall portrait window, planes moving, copy rising on a solid card.
-- **Concepts.** SAHRA's courtyard reveal and NURA/NŌTE heroes use the same layered planes; NURA's products turn and lift as their sections pass.
-
-The server renders the phone, desktop and still heroes; CSS picks one on first paint and only the matching one stays mounted after hydration, so a phone never flashes the desktop layout.
-
-## Reduced motion
-
-All position changes are dropped. Sticky travel space collapses to natural height. The viewfinder is shown open, the statement wraps statically, the process line is fully drawn, and the featured scene is shown at its resolved state. Every control still works.
-
-## Concept sites (each a separate route with its own grammar)
-
-| Concept | Category | Grammar and device | Distinct interaction |
+| Act | Device | Span (desktop) | Why |
 | --- | --- | --- | --- |
-| SAHRA | Coastal retreat | Chaptered editorial, serif, limestone palette; courtyard window reveal, horizontal room rail | Stay planner: dates, guests, room, live estimate, enquiry handoff |
-| NURA | Objects shop | Split stage, dark charcoal with forest and cobalt; pinned product stage | Variant picker, bag drawer with quantities and totals |
-| NŌTE | Café digital menu | Mobile-first menu tool, terracotta and espresso; sticky category scroll-spy | Category tabs, dietary filters, item sheet, order list to show staff |
-| MADAR | Property search | Live surface, cool slate and brick; map/list sync | Filter by district, bedrooms, budget; interactive SVG map; compare tray |
-| SANAD | Clinic booking | Stepper flow, mint and navy; stacked step reveal | Specialty, doctor, slot, details, confirmation summary |
+| 1 Hero | `parallax` + pointer | ~1 vh | Depth from four planes moving at different rates |
+| 2 Friction | `flow` | ~1 vh | Authored silence; reading, not watching |
+| 3 Scan (peak) | `pin` | 3.4 vh | The frame holds while the phone scans the card; largest span |
+| 4 Packages | `reveal` (row wipes) | ~1.6 vh | Each price arrives as a ruled entry |
+| 5 Samples | `pan` | 2.2 vh | Lateral travel reads as options |
+| 6 Process | `flow` | ~0.9 vh | Calm, short |
+| 7 Proposal | `reveal` + form | ~1.6 vh | The plate wipes in, then the page stops and responds |
 
-All five are clearly labelled fictional WASMA studio concepts.
+Families: parallax, flow, pin, reveal, pan. None twice in a row; one pin scrub, no video. No two adjacent acts share a feeling. Total ~13.2 vh desktop, 7 acts.
+
+## Hero layer contract
+
+| Plane | Content | Scroll | Pointer |
+| --- | --- | --- | --- |
+| Far | Unsplash photo for the chosen business, crossfades on change | y +140px, scale 1.06 to 1.16 | -14px |
+| Air | Short ink falloff at the photo's foot | fixed to far | none |
+| Mid | Phone with the live concept (inert here; operable in act 3) | y -90px | +18px, slight tilt |
+| Near | Table card with a real QR code | y -190px | +34px, tilt |
+| Copy | Headline, switch, CTAs | 1x | none |
+
+Phones: copy first, then the stack bleeding to the edge with the phone and card overlapping its foot. Reduced motion: same composition, no travel, card keeps its static tilt.
+
+## Peak choreography (desktop, motion allowed)
+
+`scrollYProgress` of `#scan` (340 vh): 0.06 to 0.30 the phone glides over the card and its camera view shows the code; 0.20 to 0.32 the lime reticle locks; 0.32 to 0.46 a URL pill shows the demo address; 0.42 to 0.50 a shutter flash; 0.46 to 0.58 the camera view wipes up to the live demo; 0.48 to 0.66 the phone returns beside the card; after 0.56 the phone is operable and the code stays scannable. Phones and reduced motion get the end state with an "open it on this phone" button.
+
+## Verification
+
+`npm run typecheck && npm run lint && npm run build`, then `node scripts/verify.mjs` (81 checks, including the regrade, the ?for= deep link, the peak, reduced motion and phones) and `node scripts/axe.mjs` (0 violations, ar and en). `PHOTO_MOCK=<dir> node scripts/snap.mjs ...` serves local copies of the Unsplash photos, because the build container cannot reach their CDN.

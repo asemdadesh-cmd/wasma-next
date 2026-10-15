@@ -4,6 +4,16 @@ const [url, out, w = "1440", h = "900", reduced = "no", ...pos] = process.argv.s
 const browser = await chromium.launch({ executablePath: process.env.CHROME ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" });
 const page = await browser.newPage({ viewport: { width: +w, height: +h }, deviceScaleFactor: 1, reducedMotion: reduced === "reduce" ? "reduce" : "no-preference" });
 const errors = [];
+// The build container cannot reach images.unsplash.com. PHOTO_MOCK=<dir> serves
+// <dir>/<photo-id>.jpg in its place so compositions can still be judged locally.
+if (process.env.PHOTO_MOCK) {
+  const fs = await import("node:fs");
+  await page.route("https://images.unsplash.com/**", (route) => {
+    const id = new URL(route.request().url()).pathname.slice(1);
+    const file = `${process.env.PHOTO_MOCK}/${id}.jpg`;
+    return fs.existsSync(file) ? route.fulfill({ path: file, contentType: "image/jpeg" }) : route.abort();
+  });
+}
 page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
 page.on("pageerror", (e) => errors.push(String(e)));
 await page.goto(url, { waitUntil: "networkidle" });
